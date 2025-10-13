@@ -12,26 +12,26 @@ zoom: Zoom level 1...17
 lat: Latitude
 lon: Latitude
 mtype: Map type 1...9
-1 Open Street Map
-2 Google Hybrid
-3 Google Street
-4 Google Terrain Street Hybrid
-5 Open Topo Map
-6 Esri Base Map
-7 Stadimaps Toner SW
-8 Stadimaps Terrain
-9 Free Nautical Charts (limited to German coastal waters)
+* 1 Open Street Map
+* 2 Google Hybrid
+* 3 Google Street
+* 4 Google Terrain Street Hybrid
+* 5 Open Topo Map
+* 6 Esri Base Map
+* 7 Stadimaps Toner SW
+* 8 Stadimaps Terrain
+* 9 Free Nautical Charts (limited to German coastal waters)
 mrot: Map rotation in degrees 0...360°, +/- 360°
 itype: Image types 1...4
-1 Color
-2 Grayscale 256-bit
-3 Grayscale 4-bit
-4 Black and white image 1-bit, dithered
+* 1 Color
+* 2 Grayscale 256-bit
+* 3 Grayscale 4-bit
+* 4 Black and white image 1-bit, dithered
 dtype: Dithering types 1...4 for black and white images
-1 Threshold dithering
-2 Flow Steinberg dithering
-3 Ordered dithering
-4 Atkinson dithering
+* 1 Threshold dithering
+* 2 Flow Steinberg dithering
+* 3 Ordered dithering
+* 4 Atkinson dithering
 width: Image width in pixels
 height: Image height in pixels
 debug: Additional information 0/1, tile cut, and georeference
