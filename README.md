@@ -1,5 +1,7 @@
 # Maps Converter
 
+![Converted Map](/pictures/get_image.png)
+
 The Maps Converter is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
 
 [Demo Server](https://norbert-walter.dnshome.de//get_image?zoom=15&lat=52.84279&lon=5.68436&mtype=8&mrot=10&itype=1&dtype=3&width=800&height=600&debug=1)
