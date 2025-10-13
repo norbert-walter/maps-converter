@@ -1,21 +1,21 @@
-# maps-converter
+# Maps Converter
 
-The map_converter is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
+The Maps Converter is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
 
 The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
 
 http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&debug=1
-
+  
 **zoom:** Zoom level 1...17
-
+  
 **lat:** Latitude
-
+  
 **lon:** Latitude
-
+  
 **mtype:** Map type 1...9
-
+  
 * 1 Open Street Map
 * 2 Google Hybrid
 * 3 Google Street
@@ -25,29 +25,29 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
 * 7 Stadimaps Toner SW
 * 8 Stadimaps Terrain
 * 9 Free Nautical Charts (limited to German coastal waters)
-
+  
 **mrot:** Map rotation in degrees 0...360°, +/- 360°
-
+  
 **itype:** Image types 1...4
-
+  
 * 1 Color
 * 2 Grayscale 256-bit
 * 3 Grayscale 4-bit
 * 4 Black and white image 1-bit, dithered
-
+  
 **dtype:** Dithering types 1...4 for black and white images
-
+  
 * 1 Threshold dithering
 * 2 Flow Steinberg dithering
 * 3 Ordered dithering
 * 4 Atkinson dithering
-
+  
 **width:** Image width in pixels
-
+  
 **eight:** Image height in pixels
-
+  
 **debug:** Additional information 0/1, tile cut, and georeference
-
+  
 http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&debug=1
 
 The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
