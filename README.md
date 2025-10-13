@@ -67,7 +67,8 @@ Pic.: JSON result
 # Server Dashboard
 
 ![Converted Map](/picture/Dashboard.png)
-pic.: Dashboard
+  
+Pic.: Dashboard
 
 http://ip-address:8080/dashboard
 
@@ -78,6 +79,10 @@ Displays a dashboard with information about server utilization:
 * Number of users
 
 http://ip-address:8080/map_service
+
+![Converted Map](/picture/Map_Service.png)
+  
+Pic.: Dashboard
 
 The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. On mobile phones and laptops with a built-in GPS receiver, this can be used for navigation. The device's own GPS receiver takes priority.
 
