@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Crate Docker Image..."
+echo "Create Docker Image..."
 docker build -t maps-converter .
 
 echo "Delete old docker container (when necessary)..."

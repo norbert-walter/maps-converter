@@ -2,6 +2,8 @@
 
 The Maps Converter is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
 
+[Dempo Server](https://norbert-walter.dnshome.de//get_image?zoom=15&lat=52.84279&lon=5.68436&mtype=8&mrot=10&itype=1&dtype=3&width=800&height=600&debug=1)
+
 The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
@@ -143,7 +145,7 @@ flask==2.3.3 flask-compress==1.13 diskcache==5.6.1 numpy==1.26.4 requests==2.31.
 ```
 #!/bin/bash set -e
 
-echo "Crate Docker Image..." docker build -t maps-converter-monitored .
+echo "Create Docker Image..." docker build -t maps-converter-monitored .
 
 echo "Delete old docker container (when necessary)..." docker rm -f maps-server 2>/dev/null || true
 
