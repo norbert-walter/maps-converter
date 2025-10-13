@@ -6,7 +6,7 @@ The Maps Converter is a server service from **Open Boat Projects** for convertin
 
 [Demo Server](https://norbert-walter.dnshome.de//get_image?zoom=15&lat=52.84279&lon=5.68436&mtype=8&mrot=10&itype=1&dtype=3&width=800&height=600&debug=1)
 
-The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
+The mikrocontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
 [![Action Video](/pictures/Youtube_Video.png)](https://www.youtube.com/watch?v=S9TVrxNERRY)
   
