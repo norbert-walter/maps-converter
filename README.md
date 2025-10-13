@@ -8,10 +8,14 @@ The server acts as a map proxy with file and RAM cache to improve performance an
 
 http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&debug=1
 
-zoom: Zoom level 1...17
-lat: Latitude
-lon: Latitude
-mtype: Map type 1...9
+**zoom:** Zoom level 1...17
+
+**lat:** Latitude
+
+**lon:** Latitude
+
+**mtype:** Map type 1...9
+
 * 1 Open Street Map
 * 2 Google Hybrid
 * 3 Google Street
@@ -21,20 +25,28 @@ mtype: Map type 1...9
 * 7 Stadimaps Toner SW
 * 8 Stadimaps Terrain
 * 9 Free Nautical Charts (limited to German coastal waters)
-mrot: Map rotation in degrees 0...360°, +/- 360°
-itype: Image types 1...4
+
+**mrot:** Map rotation in degrees 0...360°, +/- 360°
+
+**itype:** Image types 1...4
+
 * 1 Color
 * 2 Grayscale 256-bit
 * 3 Grayscale 4-bit
 * 4 Black and white image 1-bit, dithered
-dtype: Dithering types 1...4 for black and white images
+
+**dtype:** Dithering types 1...4 for black and white images
+
 * 1 Threshold dithering
 * 2 Flow Steinberg dithering
 * 3 Ordered dithering
 * 4 Atkinson dithering
-width: Image width in pixels
-height: Image height in pixels
-debug: Additional information 0/1, tile cut, and georeference
+
+**width:** Image width in pixels
+
+**eight:** Image height in pixels
+
+**debug:** Additional information 0/1, tile cut, and georeference
 
 http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&debug=1
 
