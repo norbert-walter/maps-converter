@@ -74,10 +74,6 @@ The nautical chart can be decorated as picture and copied into the display's fra
 
 # Server Dashboard
 
-![Converted Map](/pictures/Dashboard.png)
-  
-Pic.: Dashboard
-
 http://ip-address:8080/dashboard
 
 Displays a dashboard with information about server utilization:
@@ -86,15 +82,19 @@ Displays a dashboard with information about server utilization:
 * RAM cache utilization
 * Number of users
 
+![Converted Map](/pictures/Dashboard.png)
+  
+Pic.: Dashboard
+
 # Map Service
 
 http://ip-address:8080/map_service
 
+The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. On mobile phones and laptops with a built-in GPS receiver, this can be used for navigation. The device's own GPS receiver takes priority.
+
 ![Converted Map](/pictures/Map_Service.png)
   
 Pic.: Dashboard
-
-The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. On mobile phones and laptops with a built-in GPS receiver, this can be used for navigation. The device's own GPS receiver takes priority.
 
 http://ip-address:8080/map_help⁠
 
