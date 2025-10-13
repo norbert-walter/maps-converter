@@ -60,7 +60,9 @@ This page is a online help for the Map Service.
 
 The Docker container is listed in the public repository on Docker Hub. It can be found at:
 
-openboatprojects/maps_converter
+**openboatprojects/maps_converter**
+
+https://hub.docker.com/r/openboatprojects/maps_converter
 
 The container contains a main directory for the application software and two additional external persistent drives are mounted for log files and the cache map directory.
 
@@ -107,20 +109,26 @@ libharfbuzz-dev
 libfribidi-dev
 libxcb1
 && rm -rf /var/lib/apt/lists/*
-Copy and install requirements.txt
 
-COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt
+*Copy and install requirements.txt*
+
+*COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt*
 
 # Copy project data
 
-COPY Maps_Converter_V1_13.py . COPY monitor.py .
+*COPY Maps_Converter_V1_13.py . COPY monitor.py .*
 
 # Set port
 
-EXPOSE 8080 requirements.txt
+*EXPOSE 8080 requirements.txt*
 
-flask==2.3.3 flask-compress==1.13 diskcache==5.6.1 numpy==1.26.4 requests==2.31.0 Pillow==10.2.0 psutil==5.9.8 deploy.sh
+flask==2.3.3 flask-compress==1.13 diskcache==5.6.1 numpy==1.26.4 requests==2.31.0 Pillow==10.2.0 psutil==5.9.8 
 
+# Deployment
+
+*deploy.sh*
+
+```
 #!/bin/bash set -e
 
 echo "Crate Docker Image..." docker build -t maps-converter-monitored .
@@ -135,5 +143,5 @@ echo "Start Docker Container..." docker run -d
 --restart unless-stopped
 maps-converter-monitored
 
-echo "Server runs on: http://localhost:8080⁠
-"
+echo "Server runs on: http://localhost:8080⁠"
+```
