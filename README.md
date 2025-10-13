@@ -1,6 +1,6 @@
 # Maps Converter
 
-![Converted Map](/picture/get_image.png)
+![Converted Map](/pictures/get_image.png)
 
 The Maps Converter is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
 
@@ -66,7 +66,7 @@ http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype
 
 The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
 
-![JSON result](/picture/json.png)
+![JSON result](/pictures/json.png)
 
 Pic.: JSON result
 
@@ -74,7 +74,7 @@ The nautical chart can be decorated as picture and copied into the display's fra
 
 # Server Dashboard
 
-![Converted Map](/picture/Dashboard.png)
+![Converted Map](/pictures/Dashboard.png)
   
 Pic.: Dashboard
 
