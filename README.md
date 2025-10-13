@@ -10,7 +10,7 @@ The mikrocontroller sends a HTTP GET request to the server specifying the geocoo
 
 [![Action Video](/pictures/Youtube_Video.png)](https://www.youtube.com/watch?v=S9TVrxNERRY)
   
-Video.: [OBP60](https://obp60-v2-docu.readthedocs.io/de/latest/) with ESP32-S3 and nautical chart (Data source Maps Converter)
+Video.: [OBP60](https://obp60-v2-docu.readthedocs.io/en/latest/) with ESP32-S3 and nautical chart (Data source Maps Converter)
 
 The server service is free and can be used by anyone. It is hosted by Open Boat Projects. If you like to help or consider this project useful, please donate. Thanks for your support!
 
