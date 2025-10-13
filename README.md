@@ -8,9 +8,15 @@ The Maps Converter is a server service for converting nautical charts into vario
 
 The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
+If you like to help or consider this project useful, please donate. Thanks for your support!
+
+![Donate](/pictures/Donate.gif)
+
+[Donate with PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5QZJZBM252F2L)
+
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
 
-# Map output as png picture 
+# Nautical chart as png picture 
 
 http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&debug=1
   
@@ -54,7 +60,7 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
   
 **debug:** Additional information 0/1, tile cut, and georeference
 
-# Map output as JSON
+# Nautical Chart as JSON
   
 http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&debug=1
 
@@ -63,6 +69,8 @@ The parameters are identical to the previous descriptions. The image is output a
 ![JSON result](/picture/json.png)
 
 Pic.: JSON result
+
+The nautical chart can be decorated as picture and copied into the display's framebuffer and is compatible with the Adafruit GFX library. Sample code can be found here.
 
 # Server Dashboard
 
@@ -77,6 +85,8 @@ Displays a dashboard with information about server utilization:
 * CPU utilization
 * RAM cache utilization
 * Number of users
+
+# Map Service
 
 http://ip-address:8080/map_service
 
