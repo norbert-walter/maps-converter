@@ -56,7 +56,7 @@ http://ip-address:8080/map_help⁠
 
 This page is a online help for the Map Service.
 
-#Docker Configuration
+# Docker Configuration
 
 The Docker container is listed in the public repository on Docker Hub. It can be found at:
 
@@ -82,15 +82,15 @@ etc.
 
 Currently accessed map areas are stored in a RAM cache for subsequent access. The RAM cache size is 512 MB. This allows approximately 10,000 tiles to be stored in the RAM cache and allows approximately 50 devices to be served simultaneously. Older saved map areas are automatically deleted when the cache is full.
 
-#Basis-Image with Python
+# Basis-Image with Python
 
 FROM python:3.11-slim
 
-#Create folder
+# Create folder
 
 WORKDIR /app
 
-#Install sytem requirements (for Pillow and other)
+# Install sytem requirements (for Pillow and other)
 
 RUN apt-get update && apt-get install -y --no-install-recommends
 build-essential
@@ -111,17 +111,17 @@ Copy and install requirements.txt
 
 COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt
 
-#Copy project data
+# Copy project data
 
 COPY Maps_Converter_V1_13.py . COPY monitor.py .
 
-#Set port
+# Set port
 
 EXPOSE 8080 requirements.txt
 
 flask==2.3.3 flask-compress==1.13 diskcache==5.6.1 numpy==1.26.4 requests==2.31.0 Pillow==10.2.0 psutil==5.9.8 deploy.sh
 
-/#!/bin/bash set -e
+#!/bin/bash set -e
 
 echo "Crate Docker Image..." docker build -t maps-converter-monitored .
 
