@@ -90,7 +90,7 @@ Displays a dashboard with information about server utilization:
 
 http://ip-address:8080/map_service
 
-![Converted Map](/picture/Map_Service.png)
+![Converted Map](/pictures/Map_Service.png)
   
 Pic.: Dashboard
 
