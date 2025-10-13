@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  maps-server:
+    build: .
+    container_name: maps-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tile_cache:/app/tile_cache
+    restart: unless-stopped
