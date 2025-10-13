@@ -96,6 +96,8 @@ The map service displays a web page that allows for simple navigation. The map c
   
 Pic.: Dashboard
 
+# Help
+
 http://ip-address:8080/map_help⁠
 
 This page is a online help for the Map Service.
