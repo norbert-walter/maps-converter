@@ -10,6 +10,8 @@ The microcontroller sends a HTTP GET request to the server specifying the geocoo
 
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
 
+# Map output as png picture 
+
 http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&debug=1
   
 **zoom:** Zoom level 1...17
@@ -51,6 +53,8 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
 **eight:** Image height in pixels
   
 **debug:** Additional information 0/1, tile cut, and georeference
+
+# Map output as JSON
   
 http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&debug=1
 
@@ -59,6 +63,11 @@ The parameters are identical to the previous descriptions. The image is output a
 ![JSON result](/picture/json.png)
 
 Pic.: JSON result
+
+# Server Dashboard
+
+![Converted Map](/picture/Dashboard.png)
+pic.: Dashboard
 
 http://ip-address:8080/dashboard
 
