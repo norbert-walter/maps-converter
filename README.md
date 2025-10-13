@@ -82,17 +82,17 @@ https://hub.docker.com/r/openboatprojects/maps_converter
 
 The container contains a main directory for the application software and two additional external persistent drives are mounted for log files and the cache map directory.
 
-/app - Application folder
+**/app** - Application folder
 
-/app/logs - Log foulder
+**/app/logs** - Log foulder
 
-/app/tile_cache - Cache folder for maps
+**/app/tile_cache** - Cache folder for maps
 
 The dashboard accesses the log file and displays the values in charts. The log file is designed as a rotating file that cannot exceed a specified size. The cache map directory is organized and stored as MB Tiles. It can also be used for an MB Tiles server. Depending on the use of different geographical regions, the Map Converter's cache map directory grows over time. A distinction is made between the respective map sources, which are stored in separate subfolders.
 
-/app/tile_cache/1 - Open Street Map Cache
+**/app/tile_cache/1** - Open Street Map Cache
 
-/app/tile_cache/2 - Google Hybrid Cache
+**/app/tile_cache/2** - Google Hybrid Cache
 
 ...
 
