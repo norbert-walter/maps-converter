@@ -56,6 +56,10 @@ http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype
 
 The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
 
+![JSON result](/picture/json.png)
+
+Pic.: JSON result
+
 http://ip-address:8080/dashboard
 
 Displays a dashboard with information about server utilization:
