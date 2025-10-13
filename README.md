@@ -14,9 +14,7 @@ Video.: OBP60 with active nautical chart (Data source Maps Converter)
 
 The server service is free and can be used by anyone. It is hosted by Open Boat Projects. If you like to help or consider this project useful, please donate. Thanks for your support!
 
-![Donate](/pictures/Donate.gif)
-
-[Donate with PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5QZJZBM252F2L)
+[![Donate](/pictures/Donate.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=5QZJZBM252F2L)
 
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
 
