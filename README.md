@@ -120,7 +120,7 @@ The container contains a main directory for the application software and two add
 
 **/app/tile_cache** - Cache folder for maps
 
-The dashboard accesses the log file and displays the values in charts. The log file is designed as a rotating file that cannot exceed a specified size. The cache map directory is organized and stored as MB Tiles. It can also be used for an MB Tiles server. Depending on the use of different geographical regions, the Map Converter's cache map directory grows over time. A distinction is made between the respective map sources, which are stored in separate subfolders.
+The dashboard accesses the log file and displays the values in charts. The log file is designed as a rotating file that cannot exceed a specified size. The cache map directory is organized and stored as MBTiles. It can also be used for an MBTiles server. Depending on the use of different geographical regions, the Map Converter's cache map directory grows over time. A distinction is made between the respective map sources, which are stored in separate subfolders.
 
 **/app/tile_cache/1** - Open Street Map Cache
 
