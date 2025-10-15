@@ -786,8 +786,8 @@ def dashboard():
     </html>
     '''
     
-# Display dashboard as an HTML page
-###################################
+# Display help page
+###################
 @app.route("/help")
 def help():
     return '''
@@ -847,8 +847,8 @@ def help():
 </html>
 '''
     
-# Display dashboard as an HTML page
-###################################
+# Display navigation map
+########################
 @app.route("/map_service")
 def map_demo():
     return '''
@@ -1268,6 +1268,7 @@ def map_demo():
     '''
 
 # Start Flask web server
+########################
 if __name__ == '__main__':
 
     # Start the web server on port 8080 for JSON responses and image responses
