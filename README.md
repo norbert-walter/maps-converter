@@ -72,7 +72,7 @@ The parameters are identical to the previous descriptions. The image is output a
 
 Pic.: JSON result
 
-The nautical chart can be decorated as picture and copied into the display's framebuffer and is compatible with the Adafruit GFX library. Sample code can be found here: https://github.com/norbert-walter/obp60-navigation-map
+The nautical chart can be decorated as picture and copied into the display's framebuffer and is compatible with the Adafruit GFX library. Sample code for OBP60 and OBP40 can be found here: https://github.com/norbert-walter/obp60-navigation-map
 
 # Server Dashboard
 
