@@ -1,6 +1,6 @@
 # Maps Converter
 
-![Converted Map](/pictures/get_image.png)
+![Converted Map](/pictures/motion_map.gif)
 
 The Maps Converter is a server service from **Open Boat Projects** for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.
 
