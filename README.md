@@ -20,7 +20,7 @@ The server acts as a map proxy with file and RAM cache to improve performance an
 
 # Nautical chart as png picture 
 
-http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&debug=1
+http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
   
 **zoom:** Zoom level 1...17
   
@@ -60,13 +60,43 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
   
 **eight:** Image height in pixels
   
-**debug:** Additional information 0/1, tile cut, and georeference
+**cutout:** Image cutouts
+
+* 0 No cutout
+* 1 Round cutout
+* 2 Square cutout left
+* 3 Square cutout right
+* 4 Square cutout top
+* 5 Square cutout bottom
+* 6 Square cutout left + right
+* 7 Square cutout top + bottom
+
+**tab:** Tabs width in pixel only for square cutouts
+
+**border:** Border width in pixel 0...6
+
+**alpha:** Transparent value für cutouts 0...100%
+
+**symbol:** Symbol for center marking
+
+* 0 No symbol
+* 1 Cross
+* 2 Triangle
+
+**srot:** Symbol rotation 0...360°
+
+**ssize:** Symbol size in pixel 0...100
+
+**grid:** Geo grid for show tile size
+
+* 0 off
+* 1 on
 
 # Nautical Chart as JSON
   
-http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&debug=1
+http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&cutout=1&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
 
-The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
+The parameters are identical to the previous descriptions wothout itype and alpha. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
 
 ![JSON result](/pictures/json.png)
 
