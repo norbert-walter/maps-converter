@@ -583,8 +583,8 @@ def get_image():
         map_type = limit_check(1, 10, map_type, int)
         dither_type = limit_check(1, 4, dither_type, int)
         image_type = limit_check(1, 4, image_type, int)
-        width = limit_check(50, 800, width, int)
-        height = limit_check(50, 600, height, int)
+        width = limit_check(50, 1280, width, int)
+        height = limit_check(50, 960, height, int)
         zoom_level = limit_check(0, 18, zoom_level, int)
         debug = limit_check(0, 1, debug, int)
 
@@ -786,8 +786,8 @@ def dashboard():
     </html>
     '''
     
-# Display help page
-###################
+# Display dashboard as an HTML page
+###################################
 @app.route("/help")
 def help():
     return '''
@@ -804,7 +804,7 @@ def help():
     <p>The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:</p>
     <p><a href="http://ip-address:8080/get_image?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1">http://ip-address:8080/get_image?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1</a></p>
     <p><strong>zoom:</strong> Zoom level 1...17<br /><strong>lat:</strong> Latitude<br /><strong>lon:</strong> Latitude<br /><strong>mtype:</strong> Map type 1...9<br />&nbsp; 1 Open Street Map<br />&nbsp; 2 Google Hybrid<br />&nbsp; 3 Google Street<br />&nbsp; 4 Google Terrain Street Hybrid<br />&nbsp; 5 Open Topo Map<br />&nbsp; 6 Esri Base Map<br />&nbsp; 7 Stadimaps Toner SW<br />&nbsp; 8 Stadimaps Terrain<br />&nbsp; 9 Free Nautical Charts (limited to German coastal waters)<br /><strong>mrot:</strong> Map rotation in degrees 0...360&deg;, +/- 360&deg;<br /><strong>itype:</strong> Image types 1...4<br />&nbsp; 1 Color<br />&nbsp; 2 Grayscale 256-bit<br />&nbsp; 3 Grayscale 4-bit<br />&nbsp; 4 Black and white image 1-bit, dithered<br /><strong>dtype:</strong> Dithering types 1...4 for black and white images<br />&nbsp; 1 Threshold dithering<br />&nbsp; 2 Flow Steinberg dithering<br />&nbsp; 3 Ordered dithering<br />&nbsp; 4 Atkinson dithering<br /><strong>width:</strong> Image width in pixels<br /><strong>height:</strong> Image height in pixels<br /><strong>debug:</strong> Additional information 0/1, tile cut, and georeference<br />&nbsp; 1 Debug on<br />&nbsp; 2 Debug ogff</p>
-    <p><a href="http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1">http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1</a></p>
+    <p><a href="http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1">http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1</a></p>
     <p>The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.</p>
     <p><a href="http://ip-address:8080/dashboard">http://ip-address:8080/dashboard</a></p>
     <p>Displays a dashboard with information about server utilization:</p>
@@ -847,17 +847,18 @@ def help():
 </html>
 '''
     
-# Display navigation map
-########################
+# Display dashboard as an HTML page
+###################################
 @app.route("/map_service")
 def map_demo():
     return '''
 <!DOCTYPE html>
+
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>NMEA WebSocket-Client</title>
-  <style>
+<meta charset="utf-8"/>
+<title>NMEA WebSocket-Client</title>
+<style>
     #status-led {
       width: 15px;
       height: 15px;
@@ -887,388 +888,69 @@ def map_demo():
       white-space: pre-wrap;
       font-family: monospace;
     }
-  </style>
+</style>
 </head>
 <body>
-  <h1>NMEA WebSocket-Client</h1>
-
-  <h2>NMEA0183 TCP socket connection</h2>
-  <label>WebSocket IP-Adresse: <input type="text" id="ip"></label><br>
-  <label>WebSocket Port: <input type="number" id="port"></label><br>
-  <br>
-  <button id="connect-btn">Verbinden</button>
-  <div id="status-led"></div>
-  
-  <h2>Local GPS connection</h2>
-  <button id="gps-btn">Verbinden (GPS)</button>
-  <div id="gps-led" style="display:inline-block; margin-left: 10px; width:15px; height:15px; background:red; border-radius:50%;"></div>
-
-
-  <h2>Statusdaten</h2>
-  <div class="field"><span class="label">Latitude:</span> <span id="latitude">–</span></div>
-  <div class="field"><span class="label">Longitude:</span> <span id="longitude">–</span></div>
-  <div class="field"><span class="label">Fix Typ (GGA):</span> <span id="fix-type">–</span></div>
-  <div class="field"><span class="label">Satelliten (GSA):</span> <span id="satellites">–</span></div>
-  <div class="field"><span class="label">Heading (HDT):</span> <span id="heading">–</span></div>
-  <div class="field"><span class="label">Speed (RMC):</span> <span id="speed">–</span></div>
-  <div class="field"><span class="label">Wassertiefe (DBT):</span> <span id="depth">–</span></div>
-  
-  <h2>Karteneinstellungen</h2>
-    <label>Kartentyp:
+<h1>OBP Map Service</h1>
+<h2>NMEA0183 websocket</h2>
+<label>WebSocket IP-Adresse: <input id="ip" type="text"/></label><br/>
+<label>WebSocket Port: <input id="port" type="number"/></label><br/>
+<br/>
+<button id="connect-btn">Connect (Websocket)</button>
+<div id="status-led"></div>
+<h2>Local GPS</h2>
+<button id="gps-btn">Connect (internal GPS)</button>
+<div id="gps-led" style="display:inline-block; margin-left: 10px; width:15px; height:15px; background:red; border-radius:50%;"></div>
+<h2>Status Data</h2>
+<div class="field"><span class="label">Latitude:</span> <span id="latitude">–</span></div>
+<div class="field"><span class="label">Longitude:</span> <span id="longitude">–</span></div>
+<div class="field"><span class="label">Fix Typ (GGA):</span> <span id="fix-type">–</span></div>
+<div class="field"><span class="label">Satellits (GSA):</span> <span id="satellites">–</span></div>
+<div class="field"><span class="label">Heading (HDT):</span> <span id="heading">–</span></div>
+<div class="field"><span class="label">Speed (RMC):</span> <span id="speed">–</span></div>
+<div class="field"><span class="label">Water Depth (DBT):</span> <span id="depth">–</span></div>
+<h2>Map Settings</h2>
+<label>Map Type:
       <select id="map-type">
-        <option value="1">Open Street Map</option>
-        <option value="2">Google Hybrid</option>
-        <option value="3">Google Street</option>
-        <option value="4">Google Tarrain</option>
-        <option value="5" selected>Open Topo Map</option>
-        <option value="6">Esri Base Map</option>
-        <option value="7">Stadimaps Toner</option>
-        <option value="8">Sradimaps Tarrain</option>
-        <option value="9">Free Nautical Chart</option>
-        <option value="10">C-Map Light</option>
-      </select>
-    </label>
-    <br>
-
-    <label>Bildtyp:
+<option value="1">Open Street Map</option>
+<option value="2">Google Hybrid</option>
+<option value="3">Google Street</option>
+<option value="4">Google Tarrain</option>
+<option selected="" value="5">Open Topo Map</option>
+<option value="6">Esri Base Map</option>
+<option value="7">Stadimaps Toner</option>
+<option value="8">Stadimaps Tarrain</option>
+<option value="9">Free Nautical Chart</option>
+<option value="10">C-Map Light</option>
+</select>
+</label>
+<br/>
+<label>Image Type:
       <select id="image-type">
-        <option value="1" selected>Color</option>
-        <option value="2">Gray Scale 265</option>
-        <option value="3">Gray Scale 4</option>
-        <option value="4">Dither B&W</option>
-      </select>
-    </label>
+<option selected="" value="1">Color</option>
+<option value="2">Gray Scale 265</option>
+<option value="3">Gray Scale 4</option>
+<option value="4">Dither B&amp;W</option>
+</select>
+</label>
+<h2>Navigation Map</h2>
+<div style="margin-bottom: 10px;">
+  <button id="zoom-in">➕ Zoom In</button>
+  <button id="zoom-out">➖ Zoom Out</button>
+  <span id="zoom-display">Zoom: 15</span>
+  <strong>Traffic:</strong> <span id="traffic-counter">0.00 MB</span>
+</div>
+<img id="map-image" src="" style="border: 1px solid #ccc;"/>
+<div id="output-container">
+<button id="toggle-output">Show raw data</button>
+<pre id="output"></pre>
+</div>
 
-
-  
-  <h2>Kartenausschnitt</h2>
-  <img id="map-image" src="" style="border: 1px solid #ccc;" />
-
-  <div id="output-container">
-    <button id="toggle-output">Rohdaten anzeigen</button>
-    <pre id="output"></pre>
-  </div>
-
-  <script type="module">
-    import * as nmea from 'https://cdn.skypack.dev/nmea-simple';
-
-    const ipInput = document.getElementById('ip');
-    const portInput = document.getElementById('port');
-    const connectBtn = document.getElementById('connect-btn');
-    const output = document.getElementById('output');
-    const toggleOutputBtn = document.getElementById('toggle-output');
-    const led = document.getElementById('status-led');
-    
-    const gpsBtn = document.getElementById('gps-btn');
-    const gpsLed = document.getElementById('gps-led');
-    let gpsWatcher = null;
-
-
-    const latitudeEl = document.getElementById('latitude');
-    const longitudeEl = document.getElementById('longitude');
-    const fixTypeEl = document.getElementById('fix-type');
-    const satellitesEl = document.getElementById('satellites');
-	const headingEl = document.getElementById('heading');
-	const speedEl = document.getElementById('speed');
-    const depthEl = document.getElementById('depth');
-
-
-    let ws = null;
-    let reconnectInterval = 3000;
-    let shouldReconnect = false;
-    let reconnectTimer = null;
-    let wsUrl = '';
-    let expanded = false;
-
-    const logBuffer = [];
-	
-	const mapImg = document.getElementById('map-image');
-	let lastLat = null;
-	let lastLon = null;
-	let lastHeading = null;
-	let lastImageTime = 0;
-	
-	let useInternalGPS = false;
-	const gpsSentenceIds = ["RMC", "GGA", "GLL", "GNS", "VTG", "HDT", "GSA"];
-	
-	const mapTypeSelect = document.getElementById('map-type');
-    const imageTypeSelect = document.getElementById('image-type');
-
-		
-
-    // ===== Cookie-Handling =====
-    function setCookie(name, value, days = 365) {
-      const expires = new Date(Date.now() + days * 864e5).toUTCString();
-      document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
-    }
-
-    function getCookie(name) {
-      return document.cookie.split('; ').reduce((r, c) => {
-        const [k, v] = c.split('=');
-        return k === name ? decodeURIComponent(v) : r;
-      }, null);
-    }
-
-    function loadSavedConnection() {
-      const savedIP = getCookie("nmea_ip");
-      const savedPort = getCookie("nmea_port");
-      if (savedIP) ipInput.value = savedIP;
-      if (savedPort) portInput.value = savedPort;
-    }
-    
-    // ==== LED for GPS connection ====
-    function setGpsStatus(active) {
-      gpsLed.style.backgroundColor = active ? 'green' : 'red';
-    }
-    
-    // ==== Handle for GPS connection ====
-    gpsBtn.addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        alert("Geolocation wird von diesem Gerät nicht unterstützt.");
-        return;
-      }
-
-      if (gpsWatcher !== null) {
-        navigator.geolocation.clearWatch(gpsWatcher);
-        gpsWatcher = null;
-        useInternalGPS = false;
-        setGpsStatus(false);
-        logLine("📴 GPS-Verbindung beendet.");
-        return;
-      }
-
-      gpsWatcher = navigator.geolocation.watchPosition(
-        (position) => {
-          useInternalGPS = true;
-          setGpsStatus(true);
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          const heading = position.coords.heading ?? lastHeading ?? 0;
-
-          latitudeEl.textContent = lat.toFixed(6);
-          longitudeEl.textContent = lon.toFixed(6);
-          
-          const speedMps = position.coords.speed;
-            if (typeof speedMps === "number" && !isNaN(speedMps)) {
-              const speedKnots = speedMps * 1.94384;
-              speedEl.textContent = speedKnots.toFixed(1) + " kn";
-            } else {
-              speedEl.textContent = "–";
-            }
-
-          updateMap(lat, lon, heading);
-          logLine(`📍 GPS: ${lat.toFixed(6)}, ${lon.toFixed(6)}`);
-        },
-        (error) => {
-          logLine("⚠️ GPS-Fehler: " + error.message);
-          setGpsStatus(false);
-        },
-        {
-          enableHighAccuracy: true,
-          maximumAge: 5000,
-          timeout: 10000
-        }
-      );
-
-      logLine("🛰️ GPS-Verbindung gestartet.");
-    });
-    
-    
-	
-	// ==== Map handling ====
-	function haversine(lat1, lon1, lat2, lon2) {
-	  const R = 6371000; // Erdradius in m
-	  const toRad = x => x * Math.PI / 180;
-	  const dLat = toRad(lat2 - lat1);
-	  const dLon = toRad(lon2 - lon1);
-	  const a =
-		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-		Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-		Math.sin(dLon / 2) * Math.sin(dLon / 2);
-	  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	  return R * c;
-	}
-
-	function shouldUpdateMap(lat, lon, heading) {
-	  if (lastLat === null || lastLon === null || lastHeading === null) return true;
-
-	  const distance = haversine(lastLat, lastLon, lat, lon);
-	  const headingChanged = heading !== lastHeading;
-
-	  return distance >= 30 || headingChanged;
-	}
-
-	function updateMap(lat, lon, heading) {
-      if (!shouldUpdateMap(lat, lon, heading)) return;
-
-      const mtype = mapTypeSelect.value;
-      const itype = imageTypeSelect.value;
-      const timestamp = Date.now();
-
-      const imageUrl = `http://norbert-walter.dnshome.de:8001/get_image?zoom=15&lat=${lat}&lon=${lon}&mtype=${mtype}&mrot=${heading}&itype=${itype}&dtype=1&width=400&height=800&debug=1&t=${timestamp}`;
-      mapImg.src = imageUrl;
-
-      lastLat = lat;
-      lastLon = lon;
-      lastHeading = heading;
-      lastImageTime = timestamp;
-    }
-
-
-    // ===== Anzeige / Parser =====
-    function setStatus(connected) {
-      led.style.backgroundColor = connected ? 'green' : 'red';
-    }
-
-    function displayPacket(packet) {
-      try {
-        // GPS-Daten ignorieren, wenn internes GPS aktiv ist
-        if (useInternalGPS && gpsSentenceIds.includes(packet.sentenceId)) {
-          return;
-        }
-
-        // RMC – Position + Geschwindigkeit
-        if (packet.sentenceId === "RMC" && packet.status === "valid") {
-          latitudeEl.textContent = packet.latitude.toFixed(6);
-          longitudeEl.textContent = packet.longitude.toFixed(6);
-          speedEl.textContent = packet.speedKnots.toFixed(1) + " kn";
-          updateMap(packet.latitude, packet.longitude, lastHeading ?? 0);
-        }
-
-        // GGA – Position + Fix Type
-        if (packet.sentenceId === "GGA" && packet.fixType !== "none") {
-          latitudeEl.textContent = packet.latitude.toFixed(6);
-          longitudeEl.textContent = packet.longitude.toFixed(6);
-          fixTypeEl.textContent = packet.fixType;
-          updateMap(packet.latitude, packet.longitude, lastHeading ?? 0);
-        }
-
-        // GSA – Satellitenanzahl
-        if (packet.sentenceId === "GSA") {
-          satellitesEl.textContent = packet.satellites.length;
-        }
-
-        // HDT – Heading
-        if (packet.sentenceId === "HDT" && typeof packet.heading === "number") {
-          headingEl.textContent = packet.heading.toFixed(1) + "°";
-          updateMap(lastLat ?? 0, lastLon ?? 0, packet.heading);
-        }
-
-        // DBT – Wassertiefe
-        if (packet.sentenceId === "DBT" && typeof packet.depthMeters === "number") {
-          depthEl.textContent = packet.depthMeters.toFixed(1) + " m";
-        }
-      } catch (e) {
-        console.warn("Fehler beim Anzeigen des Pakets:", e);
-      }
-    }
-
-	
-    function updateOutput() {
-      const linesToShow = expanded ? 20 : 3;
-      const recent = logBuffer.slice(-linesToShow);
-      output.textContent = recent.join('\n');
-    }
-
-    function logLine(line) {
-      if (logBuffer.length >= 20) {
-        logBuffer.shift();
-      }
-      logBuffer.push(line);
-      updateOutput();
-    }
-
-    function connect() {
-      if (!wsUrl) return;
-
-      logLine(`🔄 Versuche Verbindung zu ${wsUrl}...`);
-      ws = new WebSocket(wsUrl);
-
-      ws.onopen = () => {
-        setStatus(true);
-        logLine(`✅ Verbunden mit ${wsUrl}`);
-        if (reconnectTimer) {
-          clearTimeout(reconnectTimer);
-          reconnectTimer = null;
-        }
-      };
-
-      ws.onmessage = (event) => {
-        const lines = event.data.split('\n');
-        for (let line of lines) {
-          line = line.trim();
-          if (!line.startsWith('$')) continue;
-
-          try {
-            const packet = nmea.parseNmeaSentence(line);
-            displayPacket(packet);
-            logLine(line);
-          } catch (e) {
-//            logLine('⚠️ Ungültig: ' + line);
-          }
-        }
-      };
-
-      ws.onclose = () => {
-        setStatus(false);
-        logLine('🔌 Verbindung geschlossen.');
-        attemptReconnect();
-      };
-
-      ws.onerror = () => {
-        setStatus(false);
-        logLine('❌ WebSocket-Fehler.');
-        ws.close();
-      };
-    }
-
-    function attemptReconnect() {
-      if (shouldReconnect && !reconnectTimer) {
-        reconnectTimer = setTimeout(() => {
-          reconnectTimer = null;
-          connect();
-        }, reconnectInterval);
-      }
-    }
-
-    connectBtn.addEventListener('click', () => {
-      const ip = ipInput.value.trim();
-      const port = portInput.value.trim();
-
-      if (!ip || !port) {
-        alert('Bitte IP und Port eingeben!');
-        return;
-      }
-
-      // Cookies setzen
-      setCookie("nmea_ip", ip);
-      setCookie("nmea_port", port);
-
-      wsUrl = `ws://${ip}:${port}`;
-      shouldReconnect = true;
-
-      if (ws && ws.readyState !== WebSocket.CLOSED) {
-        ws.close(); // Vorherige Verbindung schließen
-      } else {
-        connect(); // Neue Verbindung
-      }
-    });
-
-    toggleOutputBtn.addEventListener('click', () => {
-      expanded = !expanded;
-      toggleOutputBtn.textContent = expanded ? 'Rohdaten verbergen' : 'Rohdaten anzeigen';
-      updateOutput();
-    });
-
-    // Beim Start Cookies lesen
-    window.addEventListener('load', loadSavedConnection);
-  </script>
-</body>
+<script src="/static/map_logic_2.js" type="module"></script></body>
 </html>
     '''
 
 # Start Flask web server
-########################
 if __name__ == '__main__':
 
     # Start the web server on port 8080 for JSON responses and image responses

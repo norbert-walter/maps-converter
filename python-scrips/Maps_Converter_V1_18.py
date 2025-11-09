@@ -16,9 +16,7 @@
 #   +-logs/metrics.log
 #   |    
 #   +-tile_cache/mtype/ZZZ/XXX/YYY.pgn
-#
-# Landing page with version info
-# http://localhost:8080         
+#          
 #
 # JSON output for ESP32-S3 OBP60, SW binary image as Base64 data (Byte stream)
 # http://localhost:8080/get_image_json?zoom=15&lat=53.9028&lon=11.4441&mrot=10&mtype=4&width=400&height=300&debug=1
@@ -504,26 +502,6 @@ def update_active_ips(ip):
 # Version with dynamically gzip-compressed JSON output if supported by client  #
 ###################################################################################
 
-# Display HTML landing page
-###########################
-@app.route("/")
-def start():
-    return '''
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Swipe Navigation Beispiel</title>
-  <style>
-  </style>
-</head>
-<body>
-    <h1>OBP Maps Converter V1.9</h1>
-</body>
-</html>
-    '''
-
 # Respond to HTTP request for JSON response
 ###########################################
 @app.route('/get_image_json', methods=['GET'])
@@ -823,23 +801,16 @@ def help():
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Help</title>
 </head>
 <body>
     <h1>Map Converter</h1>
-    <p>Open Boat Projects (C) 2025 Norbert Walter, MIT</p>
+    <p>Open Boat Projects (C) 2025 Norbert Walter, GPL 2.0</p>
     <p>The <strong>Map Converter</strong> is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.</p>
     <p>The microcontroller sends an HTTP GET request to the server, specifying the geocoordinates, direction of travel, image size, and image type. The server then transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.</p>
     <h2>Using the map server</h2>
     <p>The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:</p>
-    
-    <p><a href="http://ip-address:8080">http://ip-address:8080</a></p>
-    <p>This page is the landing page and show the version number.</p>
-    
     <p><a href="http://ip-address:8080/get_image?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1">http://ip-address:8080/get_image?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;itype=4&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1</a></p>
-    <p><strong>zoom:</strong> Zoom level 1...17<br><strong>lat:</strong> Latitude<br><strong>lon:</strong> Latitude<br><strong>mtype:</strong> Map type 1...9<br>&nbsp; 1 Open Street Map<br>&nbsp; 2 Google Hybrid<br>&nbsp; 3 Google Street<br>&nbsp; 4 Google Terrain Street Hybrid<br>&nbsp; 5 Open Topo Map<br>&nbsp; 6 Esri Base Map<br>&nbsp; 7 Stadimaps Toner SW<br>&nbsp; 8 Stadimaps Terrain<br>&nbsp; 9 Free Nautical Charts (limited to German coastal waters)<br><strong>mrot:</strong> Map rotation in degrees 0...360&deg;, +/- 360&deg;<br><strong>itype:</strong> Image types 1...4<br>&nbsp; 1 Color<br>&nbsp; 2 Grayscale 256-bit<br>&nbsp; 3 Grayscale 4-bit<br>&nbsp; 4 Black and white image 1-bit, dithered<br><strong>dtype:</strong> Dithering types 1...4 for black and white images<br>&nbsp; 1 Threshold dithering<br>&nbsp; 2 Flow Steinberg dithering<br>&nbsp; 3 Ordered dithering<br>&nbsp; 4 Atkinson dithering<br><strong>width:</strong> Image width in pixels<br><strong>height:</strong> Image height in pixels<br><strong>debug:</strong> Additional information 0/1, tile cut, and georeference<br>&nbsp; 1 Debug on<br>&nbsp; 2 Debug ogff</p>
-    
+    <p><strong>zoom:</strong> Zoom level 1...17<br /><strong>lat:</strong> Latitude<br /><strong>lon:</strong> Latitude<br /><strong>mtype:</strong> Map type 1...9<br />&nbsp; 1 Open Street Map<br />&nbsp; 2 Google Hybrid<br />&nbsp; 3 Google Street<br />&nbsp; 4 Google Terrain Street Hybrid<br />&nbsp; 5 Open Topo Map<br />&nbsp; 6 Esri Base Map<br />&nbsp; 7 Stadimaps Toner SW<br />&nbsp; 8 Stadimaps Terrain<br />&nbsp; 9 Free Nautical Charts (limited to German coastal waters)<br /><strong>mrot:</strong> Map rotation in degrees 0...360&deg;, +/- 360&deg;<br /><strong>itype:</strong> Image types 1...4<br />&nbsp; 1 Color<br />&nbsp; 2 Grayscale 256-bit<br />&nbsp; 3 Grayscale 4-bit<br />&nbsp; 4 Black and white image 1-bit, dithered<br /><strong>dtype:</strong> Dithering types 1...4 for black and white images<br />&nbsp; 1 Threshold dithering<br />&nbsp; 2 Flow Steinberg dithering<br />&nbsp; 3 Ordered dithering<br />&nbsp; 4 Atkinson dithering<br /><strong>width:</strong> Image width in pixels<br /><strong>height:</strong> Image height in pixels<br /><strong>debug:</strong> Additional information 0/1, tile cut, and georeference<br />&nbsp; 1 Debug on<br />&nbsp; 2 Debug ogff</p>
     <p><a href="http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1">http://ip-address:8080/get_image_json?zoom=15&amp;lat=53.9028&amp;lon=11.4441&amp;mtype=8&amp;mrot=10&amp;dtype=3&amp;width=400&amp;height=300&amp;debug=1</a></p>
     <p>The parameters are identical to the previous descriptions. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.</p>
     <p><a href="http://ip-address:8080/dashboard">http://ip-address:8080/dashboard</a></p>
@@ -850,47 +821,41 @@ def help():
     <li>RAM cache utilization</li>
     <li>Number of users</li>
     </ul>
-    
     <p><a href="http://ip-address:8080/map_service">http://ip-address:8080/map_service</a></p>
-    <p>The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. This can be used for navigation on mobile phones and laptops with a built-in GPS receiver. The device&rsquo;s own GPS receiver takes priority. The settings for the WebSocket connection are stored in a cookie.</p>
-    
-    <p><a href="http://ip-address:8080/map_service?ip=127.0.0.1&port=3000&start=1">http://ip-address:8080/map_service?ip=127.0.0.1&port=3000&start=1</a></p>
-    <p>The website functions the same as before, with the difference that you can pass parameters for the websocket. The values passed for the websocket connection are passed as default parameters and stored in a cookie for later calls. The <strong>start</strong> parameter can be used to specify whether the connection should be started immediately when the website is accessed (start=1).</p>
-    
+    <p>The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. This can be used for navigation on mobile phones and laptops with a built-in GPS receiver. The device&rsquo;s own GPS receiver takes priority.</p>
     <p><a href="http://ip-address:8080/map_help">http://ip-address:8080/map_help</a></p>
     <p>This page is a online help for the Map Service.</p>
-    
     <h2>Docker Konfiguration</h2>
-    <p>The Docker container is listed in the public repository on Docker Hub. It can be found at:</p>
-    <p><a href="https://hub.docker.com/r/openboatprojects/maps_converter">openboatprojects/maps_converter</a></p>
+    <p><span class="HwtZe" lang="en"><span class="jCAhz ChMk0b"><span class="ryNqvb">The Docker container is listed in the public repository on Docker Hub.</span></span> <span class="jCAhz ChMk0b"><span class="ryNqvb">It can be found at:</span></span></span></p>
+    <p><a href="https://hub.docker.com/r/openboatprojects/maps_converter"><span class="HwtZe" lang="en"><span class="jCAhz ChMk0b"><span class="ryNqvb">openboatprojects/maps_converter</span></span></span></a></p>
     
     <p>The container contains a main directory for the application software and two additional external persistent drives are mounted for log files and the cache map directory.</p>
-    <p><strong>/app</strong> - Application folder<br><strong>/app/logs</strong> - Log foulder<br><strong>/app/tile_cache</strong> - Cache folder for maps</p>
+    <p><strong>/app</strong> - Application folder<br /><strong>/app/logs</strong> - Log foulder<br /><strong>/app/tile_cache</strong> - Cache folder for maps</p>
     <p>The dashboard accesses the log file and displays the values in charts. The log file is designed as a rotating file that cannot exceed a specified size. The cache map directory is organized and stored as MB Tiles. It can also be used for an MB Tiles server. Depending on the use of different geographical regions, the Map Converter's cache map directory grows over time. A distinction is made between the respective map sources, which are stored in separate subfolders.</p>
-    <p><strong>/app/tile_cache/1</strong> - Open Street Map Cache<br><strong>/app/tile_cache/2</strong> - Google Hybrid Cache<br>...<br>etc.</p>
+    <p><strong>/app/tile_cache/1</strong> - Open Street Map Cache<br /><strong>/app/tile_cache/2</strong> - Google Hybrid Cache<br />...<br />etc.</p>
     <p>Currently accessed map areas are stored in a RAM cache for subsequent access. The RAM cache size is 512 MB. This allows approximately 10,000 tiles to be stored in the RAM cache and allows approximately 50 devices to be served simultaneously. Older saved map areas are automatically deleted when the cache is full.</p>
             
     <h3>Dockerfile</h3>
-    <p><code># Basis-Image with Python</code><br><code>FROM python:3.11-slim</code></p>
-    <p><code># Create folder</code><br><code>WORKDIR /app</code></p>
-    <p><code># Install sytem requirements (for Pillow and other)</code><br><code>RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \</code><br><code>build-essential \</code><br><code>libjpeg-dev \</code><br><code>zlib1g-dev \</code><br><code>libfreetype6-dev \</code><br><code>liblcms2-dev \</code><br><code>libwebp-dev \</code><br><code>libopenjp2-7 \</code><br><code>libtiff-dev \</code><br><code>libxml2-dev \</code><br><code>libxslt1-dev \</code><br><code>libharfbuzz-dev \</code><br><code>libfribidi-dev \</code><br><code>libxcb1 \</code><br><code>&amp;&amp; rm -rf /var/lib/apt/lists/*</code></p>
-    <p><code># Copy and install requirements.txt</code><br><code>COPY requirements.txt .</code><br><code>RUN pip install --no-cache-dir -r requirements.txt</code></p>
-    <p><code># Copy project data</code><br><code>COPY Maps_Converter_V1_11.py .</code><br><code>COPY monitor.py .</code></p>
-    <p><code># Set port</code><br><code>EXPOSE 8080</code></p>
+    <p><code># Basis-Image with Python</code><br /><code>FROM python:3.11-slim</code></p>
+    <p><code># Create folder</code><br /><code>WORKDIR /app</code></p>
+    <p><code># Install sytem requirements (for Pillow and other)</code><br /><code>RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \</code><br /><code>build-essential \</code><br /><code>libjpeg-dev \</code><br /><code>zlib1g-dev \</code><br /><code>libfreetype6-dev \</code><br /><code>liblcms2-dev \</code><br /><code>libwebp-dev \</code><br /><code>libopenjp2-7 \</code><br /><code>libtiff-dev \</code><br /><code>libxml2-dev \</code><br /><code>libxslt1-dev \</code><br /><code>libharfbuzz-dev \</code><br /><code>libfribidi-dev \</code><br /><code>libxcb1 \</code><br /><code>&amp;&amp; rm -rf /var/lib/apt/lists/*</code></p>
+    <p><code># Copy and install requirements.txt</code><br /><code>COPY requirements.txt .</code><br /><code>RUN pip install --no-cache-dir -r requirements.txt</code></p>
+    <p><code># Copy project data</code><br /><code>COPY Maps_Converter_V1_11.py .</code><br /><code>COPY monitor.py .</code></p>
+    <p><code># Set port</code><br /><code>EXPOSE 8080</code></p>
     <h3>requirements.txt</h3>
-    <p><code>flask==2.3.3<br>flask-compress==1.13<br>diskcache==5.6.1<br>numpy==1.26.4<br>requests==2.31.0<br>Pillow==10.2.0<br></code>psutil==5.9.8</p>
+    <p><code>flask==2.3.3<br />flask-compress==1.13<br />diskcache==5.6.1<br />numpy==1.26.4<br />requests==2.31.0<br />Pillow==10.2.0<br /></code>psutil==5.9.8</p>
     <h3>deploy.sh</h3>
-    <p><code>#!/bin/bash</code><br><code>set -e</code></p>
-    <p><code>echo "Crate Docker Image..."</code><br><code>docker build -t maps-converter-monitored .</code></p>
-    <p><code>echo "Delete old docker container (when necessary)..."</code><br><code>docker rm -f maps-server 2&gt;/dev/null || true</code></p>
-    <p><code>echo "Start Docker Container..."</code><br><code>docker run -d \</code><br><code>--name maps-server \</code><br><code>-p 8080:8080 \</code><br><code>-v "$(pwd)/tile_cache:/app/tile_cache" \</code><br><code>-v "$(pwd)/logs:/app/logs" \</code><br><code>--restart unless-stopped \</code><br><code>maps-converter-monitored</code></p>
+    <p><code>#!/bin/bash</code><br /><code>set -e</code></p>
+    <p><code>echo "Crate Docker Image..."</code><br /><code>docker build -t maps-converter-monitored .</code></p>
+    <p><code>echo "Delete old docker container (when necessary)..."</code><br /><code>docker rm -f maps-server 2&gt;/dev/null || true</code></p>
+    <p><code>echo "Start Docker Container..."</code><br /><code>docker run -d \</code><br /><code>--name maps-server \</code><br /><code>-p 8080:8080 \</code><br /><code>-v "$(pwd)/tile_cache:/app/tile_cache" \</code><br /><code>-v "$(pwd)/logs:/app/logs" \</code><br /><code>--restart unless-stopped \</code><br /><code>maps-converter-monitored</code></p>
     <p><code>echo "Server runs on: http://localhost:8080"</code></p>
 </body>
 </html>
-    '''
+'''
     
-# Display map service as an HTML page
-#####################################
+# Display dashboard as an HTML page
+###################################
 @app.route("/map_service")
 def map_demo():
     return '''
@@ -937,10 +902,6 @@ def map_demo():
   <h2>NMEA0183 Websocket</h2>
   <label>WebSocket IP-Adresse: <input type="text" id="ip"></label><br>
   <label>WebSocket Port: <input type="number" id="port"></label><br>
-   <label>
-      Auto Start:
-      <input type="checkbox" id="start" />
-    </label>
   <br>
   <button id="connect-btn">Connect (Websocket)</button>
   <div id="status-led"></div>
@@ -1021,7 +982,7 @@ def map_demo():
     <pre id="output"></pre>
   </div>
 
-<script src="/static/map_logic_6.js" type="module"></script></body>
+<script src="/static/map_logic_5.js" type="module"></script></body>
 </html>
     '''
     

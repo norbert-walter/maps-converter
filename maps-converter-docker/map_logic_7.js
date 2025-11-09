@@ -280,7 +280,7 @@
         flipStatusText.textContent = "";
       }
       
-      const imageUrl = baseURL + `/get_image?zoom=${zoom}&lat=${lat}&lon=${lon}&mtype=${mtype}&mrot=${heading}&itype=${itype}&dtype=1&width=${width}&height=${height}&debug=1&t=${timestamp}`;
+      const imageUrl = baseURL + `/get_image?zoom=${zoom}&lat=${lat}&lon=${lon}&mtype=${mtype}&mrot=${heading}&itype=${itype}&dtype=1&width=${width}&height=${height}&symbol=2&srot=${heading}&ssize=15&grid=1&t=${timestamp}`;
 
       // At first load HTTP header and read the exact content length
       fetch(imageUrl)
@@ -347,7 +347,7 @@
         flipStatusText.textContent = "";
       }
       
-      const imageUrl = baseURL + `/get_image?zoom=${zoom}&lat=${lat}&lon=${lon}&mtype=${mtype}&mrot=${heading}&itype=${itype}&dtype=1&width=${width}&height=${height}&debug=1&t=${timestamp2}`;
+      const imageUrl = baseURL + `/get_image?zoom=${zoom}&lat=${lat}&lon=${lon}&mtype=${mtype}&mrot=${heading}&itype=${itype}&dtype=1&width=${width}&height=${height}&symbol=2&srot=${heading}&ssize=15&grid=1&t=${timestamp2}`;
 
       // At first load HTTP header and read the exact content length
       fetch(imageUrl)
