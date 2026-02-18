@@ -6,7 +6,7 @@ The Maps Converter is a server service from **Open Boat Projects** for convertin
 
 [Demo Server](https://norbert-walter.dnshome.de//get_image?zoom=13&lat=54.5649&lon=13.1434&mtype=9&mrot=10&itype=1&dtype=2&width=800&height=600&debug=1)
 
-The mikrocontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
+The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
 [![Action Video](/pictures/Youtube_Video.png)](https://www.youtube.com/watch?v=S9TVrxNERRY)
   
@@ -58,18 +58,19 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
   
 **width:** Image width in pixels
   
-**eight:** Image height in pixels
+**height:** Image height in pixels
   
 **cutout:** Image cutouts
 
 * 0 No cutout
-* 1 Round cutout
+* 1 Elliptical cutout
 * 2 Square cutout left
 * 3 Square cutout right
 * 4 Square cutout top
 * 5 Square cutout bottom
 * 6 Square cutout left + right
 * 7 Square cutout top + bottom
+* 8 Circle cutout (only for 1bit pbm format)
 
 **tab:** Tabs width in pixel only for square cutouts
 
@@ -103,6 +104,12 @@ The parameters are identical to the previous descriptions wothout itype and alph
 Pic.: JSON result
 
 The nautical chart can be decorated as picture and copied into the display's framebuffer and is compatible with the Adafruit GFX library. Sample code for OBP60 and OBP40 can be found here: https://github.com/norbert-walter/obp60-navigation-map
+
+# Nautical chart as pbm picture
+
+For smallest data footprint 1bit black and white binary pbm format is available.
+
+The alpha and itype parameters are not necessary for this format.
 
 # Server Dashboard
 
