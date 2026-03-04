@@ -24,9 +24,9 @@
 #
 # PBM output for ESP32-S3 black and white image, 1bit color depth
 # http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2
-
+#
 # JSON output for ESP32-S3 OBP60, SW binary image as Base64 data (Byte stream)
-# http://localhost:8080/get_image_json?zoom=14&lat=54.5649&lon=13.1434&mtype=9&mrot=10&dtype=1&width=800&height=600&cutout=1&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
+# http://ip-address:8080/get_image_json?oformat=3&zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
 #
 # PNG image output for website 
 # http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=2&mrot=20&itype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
