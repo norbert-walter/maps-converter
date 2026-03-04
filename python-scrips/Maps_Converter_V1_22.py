@@ -802,7 +802,6 @@ def limit_check(min, max, input, typ=int):
     :param typ: The expected data type (default is int)
     :return: The validated and limited value
     """
-    print(f" limit check {input} between {min} and {max}")
     try:
         # Convert the input to the desired type
         value = typ(input)
