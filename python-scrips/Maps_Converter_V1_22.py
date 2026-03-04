@@ -973,7 +973,7 @@ def get_image_json():
         map_rotation = float(request.args.get('mrot', 0))   # Map rotation 0...360 deg
         map_type = int(request.args.get('mtype', 1))
         image_type = int(request.args.get('itype', 4))      # 1: Color, 2: Grayscale, 3: 4-Level Grayscale, 4: BW with Dithering
-        output_format = int(request.args.get('itype', 1))   # 1: RGB888, 2: RGB666, 3: RGB565, 4: BW 1-Bit
+        output_format = int(request.args.get('oformat', 1)) # 1: RGB888, 2: RGB666, 3: RGB565, 4: BW 1-Bit
         dither_type = int(request.args.get('dtype', 2))     # 1: Threshold 2: Floyd Steinberg 3: Ordered 4: Atkinson (slow)
         width = int(request.args.get('width', 400))
         height = int(request.args.get('height', 300))
@@ -981,6 +981,7 @@ def get_image_json():
         cutout = int(request.args.get('cutout', 0))         # 0=Original, 1=Round/Oval, 2=Square L, 3=Square R, 4=Square T, 5=Square B, 6=Square L+R, 7=Square T+B
         tab = int(request.args.get('tab', 0))               # Tab with in pixel depends on picture size
         border = int(request.args.get('border', 0))         # 0: Without border 1...6: Border width in Pixel
+        alpha = int(request.args.get('alpha', 100))         # 0...100%, 0: Complete cutout 100: Original image
         symbol = int(request.args.get('symbol', 0))         # Center symbol 0: no symbol 1: Cross 2: Triangle
         sym_rotation = float(request.args.get('srot', 0))   # Symbol rotation 0...360 deg
         sym_size = int(request.args.get('ssize', 15))       # Symbol size 10...100
@@ -992,7 +993,7 @@ def get_image_json():
         map_rotation = limit_check(-360.0, 360.0, map_rotation, float)
         map_type = limit_check(1, 200000000, map_type, int)
         image_type = limit_check(1, 4, image_type, int)
-        output_format = limit_check(1, 4, image_type, int)
+        output_format = limit_check(1, 4, output_format, int)
         dither_type = limit_check(1, 4, dither_type, int)
         width = limit_check(50, 800, width, int)
         height = limit_check(50, 600, height, int)
@@ -1015,6 +1016,7 @@ def get_image_json():
         elif cutout == 7:
             tab = limit_check(0, (height/2), tab, int)      
         border = limit_check(0, 6, border, int)
+        alpha = limit_check(0, 100, alpha, int)
         symbol = limit_check(0, 2, symbol, int)
         sym_rotation = limit_check(-360.0, 360.0, sym_rotation, float)
         sym_size = limit_check(0, 100, sym_size, int)
@@ -1025,7 +1027,7 @@ def get_image_json():
         temp_image = stitch_and_rotate_tiles(lat, lon, zoom_level, output_size_pixels, map_rotation, map_type, symbol, sym_size, sym_rotation, show_grid)
 
         # Post processing: converts image into a round/oval or square image
-        temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=0)
+        temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
         
         # Select the image output type based on the 'type' parameter
         if image_type == 1:
@@ -1041,13 +1043,31 @@ def get_image_json():
             
         # Select the image output format
         if output_format == 1:      # RGB888
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8)
+            byte_array = rgb_array.reshape(-1, 3).flatten().tolist()
 
         elif output_format == 2:    # RGB666
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8)
+            rgb666_array = rgb_array & 0xFC
+            byte_array = rgb666_array.reshape(-1, 3).flatten().tolist()
 
         elif output_format == 3:    # RGB565 (very popular)
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8).reshape(-1, 3)
+            r = rgb_array[:, 0].astype(np.uint16)
+            g = rgb_array[:, 1].astype(np.uint16)
+            b = rgb_array[:, 2].astype(np.uint16)
+            rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+            byte_array = np.empty(rgb565.size * 2, dtype=np.uint8)
+            byte_array[0::2] = ((rgb565 >> 8) & 0xFF).astype(np.uint8)
+            byte_array[1::2] = (rgb565 & 0xFF).astype(np.uint8)
+            byte_array = byte_array.tolist()
 
         elif output_format == 4:    # Convert the image to a byte array (1Bit, 1 = black, 0 = white)
-            byte_array = image_to_bytearray(final_image)
+            if image_type == 4:
+                bw_for_bytes = final_image
+            else:
+                bw_for_bytes = convert_to_black_and_white(final_image, dither_type)
+            byte_array = image_to_bytearray(bw_for_bytes)
         else:
             return "Invalid image output format!", 400      
         

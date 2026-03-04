@@ -26,7 +26,7 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
   
 **lat:** Latitude
   
-**lon:** Latitude
+**lon:** Longitude
   
 **mtype:** Map type 1...9
   
@@ -52,7 +52,7 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
 **dtype:** Dithering types 1...4 for black and white images
   
 * 1 Threshold dithering
-* 2 Flow Steinberg dithering
+* 2 Floyd-Steinberg dithering
 * 3 Ordered dithering
 * 4 Atkinson dithering
   
@@ -72,11 +72,11 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
 * 7 Square cutout top + bottom
 * 8 Circle cutout (only for 1bit pbm format)
 
-**tab:** Tabs width in pixel only for square cutouts
+**tab:** Tab width in pixels (only for square cutouts)
 
 **border:** Border width in pixel 0...6
 
-**alpha:** Transparent value für cutouts 0...100%
+**alpha:** Transparency value for cutouts 0...100%
 
 **symbol:** Symbol for center marking
 
@@ -86,30 +86,41 @@ http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mr
 
 **srot:** Symbol rotation 0...360°
 
-**ssize:** Symbol size in pixel 0...100
+**ssize:** Symbol size in pixels 0...100
 
-**grid:** Geo grid for show tile size
+**grid:** Show tile grid overlay
 
 * 0 off
 * 1 on
 
 # Nautical Chart as JSON
-  
-http://ip-address:8080/get_image_json?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&cutout=1&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
 
-The parameters are identical to the previous descriptions wothout itype and alpha. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
+http://ip-address:8080/get_image_json?oformat=3&zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
+
+All parameters are identical to the previous section, plus the new parameter **oformat**.
+
+**oformat:** Output format 1...4
+
+* 1 RGB888 (3 bytes per pixel: R, G, B)
+* 2 RGB666 (3 bytes per pixel, 6-bit precision per channel, stored in 8-bit bytes)
+* 3 RGB565 (2 bytes per pixel, high byte first, then low byte)
+* 4 Black-and-white 1-bit packed format (MSB first, white = 0, black = 1)
+
+The image data is returned in Base64 as a binary byte stream. Pixel data is serialized row by row from left to right and top to bottom, with the origin at the upper-left corner.
 
 ![JSON result](/pictures/json.png)
 
 Pic.: JSON result
 
-The nautical chart can be decorated as picture and copied into the display's framebuffer and is compatible with the Adafruit GFX library. Sample code for OBP60 and OBP40 can be found here: https://github.com/norbert-walter/obp60-navigation-map
+The nautical chart can be decorated as an image and copied into the display framebuffer. The output is compatible with common microcontroller display pipelines (including ESP32-S3 use cases) and with the Adafruit GFX library. Sample code for OBP60 and OBP40 can be found here: https://github.com/norbert-walter/obp60-navigation-map
 
 # Nautical chart as pbm picture
 
-For smallest data footprint 1bit black and white binary pbm format is available.
+http://ip-address:8080/get_image_pbm?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
 
-The alpha and itype parameters are not necessary for this format.
+For the smallest data footprint, 1-bit black-and-white PBM format is available.
+
+The `alpha` and `itype` parameters are not required for this format.
 
 # Server Dashboard
 
@@ -133,13 +144,13 @@ The map service displays a web page that allows for simple navigation. The map c
 
 ![Converted Map](/pictures/Map_Service.png)
   
-Pic.: Dashboard
+Pic.: Map Service
 
 # Help
 
-http://ip-address:8080/map_help⁠
+http://ip-address:8080/help
 
-This page is a online help for the Map Service.
+This page is an online help page for the Map Service.
 
 # Docker Configuration
 
@@ -153,7 +164,7 @@ The container contains a main directory for the application software and two add
 
 **/app** - Application folder
 
-**/app/logs** - Log foulder
+**/app/logs** - Log folder
 
 **/app/tile_cache** - Cache folder for maps
 
@@ -169,62 +180,30 @@ etc.
 
 Currently accessed map areas are stored in a RAM cache for subsequent access. The RAM cache size is 512 MB. This allows approximately 10,000 tiles to be stored in the RAM cache and allows approximately 50 devices to be served simultaneously. Older saved map areas are automatically deleted when the cache is full.
 
-# Basis-Image with Python
+# Docker setup
 
-FROM python:3.11-slim
+Use the provided `Dockerfile` and `deploy.sh` in this repository.
 
-# Create folder
+Build and run manually:
 
-WORKDIR /app
-
-# Install sytem requirements (for Pillow and other)
-
-RUN apt-get update && apt-get install -y --no-install-recommends
-build-essential
-libjpeg-dev
-zlib1g-dev
-libfreetype6-dev
-liblcms2-dev
-libwebp-dev
-libopenjp2-7
-libtiff-dev
-libxml2-dev
-libxslt1-dev
-libharfbuzz-dev
-libfribidi-dev
-libxcb1
-&& rm -rf /var/lib/apt/lists/*
-
-*Copy and install requirements.txt*
-
-*COPY requirements.txt . RUN pip install --no-cache-dir -r requirements.txt*
-
-# Copy project data
-
-*COPY Maps_Converter_V1_13.py . COPY monitor.py .*
-
-# Set port
-
-*EXPOSE 8080 requirements.txt*
-
-# Deployment
-
-*deploy.sh*
-
+```bash
+docker build -t maps-converter-monitored .
+docker rm -f maps-server 2>/dev/null || true
+docker run -d \
+	--name maps-server \
+	-p 8080:8080 \
+	-v "$(pwd)/tile_cache:/app/tile_cache" \
+	-v "$(pwd)/logs:/app/logs" \
+	--restart unless-stopped \
+	maps-converter-monitored
 ```
-#!/bin/bash set -e
 
-echo "Create Docker Image..." docker build -t maps-converter-monitored .
+Or use:
 
-echo "Delete old docker container (when necessary)..." docker rm -f maps-server 2>/dev/null || true
-
-echo "Start Docker Container..." docker run -d
---name maps-server
--p 8080:8080
--v "$(pwd)/tile_cache:/app/tile_cache"
--v "$(pwd)/logs:/app/logs"
---restart unless-stopped
-maps-converter-monitored
-
-echo "Server runs on: http://localhost:8080⁠"
+```bash
+./deploy.sh
 ```
+
+Server URL:
+
+http://localhost:8080
