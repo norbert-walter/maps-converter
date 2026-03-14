@@ -487,7 +487,7 @@ def add_copyright_to_image(image, map_type, cutout_type=0):
     if not copyright_parts:
         return image
 
-    text = " | ".join(copyright_parts)
+    text = " | ".join(copyright_parts + [f"(C) OBP {datetime.utcnow().year}"])
     working_image = image.copy()
 
     if working_image.mode not in ("RGB", "RGBA"):
