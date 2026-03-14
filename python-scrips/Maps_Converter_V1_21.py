@@ -144,22 +144,23 @@ def get_user_agent():
         return "Mozilla/5.0 (compatible; Unknown OS; rv:148.0) Gecko/20100101"
 
 
+# Copyright informations for all tiles sources
 def get_map_copyright_texts(map_type):
     if map_type == 1:
-        return "(C) OpenStreetMap contributors", "(C) OpenSeaMap contributors"
+        return "(C) OpenStreetMap", "(C) OpenSeaMap"
     elif map_type in (2, 3, 4):
-        return "(C) Google", "(C) OpenSeaMap contributors"
+        return "(C) Google", "(C) OpenSeaMap"
     elif map_type == 5:
-        return "(C) OpenTopoMap contributors", "(C) OpenSeaMap contributors"
+        return "(C) OpenTopoMap", "(C) OpenSeaMap"
     elif map_type == 6:
-        return "(C) Esri", "(C) OpenSeaMap contributors"
+        return "(C) Esri", "(C) OpenSeaMap"
     elif map_type in (7, 8):
-        return "(C) Stadia Maps", "(C) OpenSeaMap contributors"
+        return "(C) Stadia Maps", "(C) OpenSeaMap"
     elif map_type == 9:
         return "(C) freenauticalchart.net", ""
-    return "(C) OpenStreetMap contributors", "(C) OpenSeaMap contributors"
+    return "(C) OpenStreetMap", "(C) OpenSeaMap"
 
-
+# Load fonts fpr copyright info
 def load_copyright_font(font_size):
     try:
         return ImageFont.truetype("DejaVuSans.ttf", font_size)
@@ -476,7 +477,7 @@ def draw_tile_borders(image, tile_x, tile_y):
     # Draw the tile borders
     draw.rectangle([top_left_x, top_left_y, bottom_right_x - 1, bottom_right_y - 1], outline="black", width=1)
 
-
+# Add copyright text to image
 def add_copyright_to_image(image, map_type, cutout_type=0):
     if cutout_type in (1, 8):
         return image
@@ -1091,6 +1092,8 @@ def get_image_pbm():
 
         # Cutout and borders
         temp_image = cutout_image_bw(temp_image, cutout, tab, border)
+        
+        # Add copyright
         temp_image = add_copyright_to_image(temp_image, map_type, cutout)
 
         # Dithering
@@ -1179,6 +1182,8 @@ def get_image_json():
 
         # Post processing: converts image into a round/oval or square image
         temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
+        
+        # Add copyright
         temp_image = add_copyright_to_image(temp_image, map_type, cutout)
         
         # Select the image output type based on the 'type' parameter
@@ -1327,6 +1332,8 @@ def get_image():
             
         # Post processing: converts image into a round/oval or square image
         final_image = cutout_image(final_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
+        
+        # Add copyright
         final_image = add_copyright_to_image(final_image, map_type, cutout)
         
         # Convert the image to a byte stream
