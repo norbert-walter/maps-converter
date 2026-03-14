@@ -143,6 +143,29 @@ def get_user_agent():
     else:
         return "Mozilla/5.0 (compatible; Unknown OS; rv:148.0) Gecko/20100101"
 
+
+def get_map_copyright_texts(map_type):
+    if map_type == 1:
+        return "(C) OpenStreetMap contributors", "(C) OpenSeaMap contributors"
+    elif map_type in (2, 3, 4):
+        return "(C) Google", "(C) OpenSeaMap contributors"
+    elif map_type == 5:
+        return "(C) OpenTopoMap contributors", "(C) OpenSeaMap contributors"
+    elif map_type == 6:
+        return "(C) Esri", "(C) OpenSeaMap contributors"
+    elif map_type in (7, 8):
+        return "(C) Stadia Maps", "(C) OpenSeaMap contributors"
+    elif map_type == 9:
+        return "(C) freenauticalchart.net", ""
+    return "(C) OpenStreetMap contributors", "(C) OpenSeaMap contributors"
+
+
+def load_copyright_font(font_size):
+    try:
+        return ImageFont.truetype("DejaVuSans.ttf", font_size)
+    except OSError:
+        return ImageFont.load_default()
+
 # Function to fetch MB-Tiles tiles
 def fetch_osm_tile(x, y, zoom, map_type):
     global old_value    # Timer status toggel between 0 und 1
@@ -452,6 +475,64 @@ def draw_tile_borders(image, tile_x, tile_y):
     
     # Draw the tile borders
     draw.rectangle([top_left_x, top_left_y, bottom_right_x - 1, bottom_right_y - 1], outline="black", width=1)
+
+
+def add_copyright_to_image(image, map_type, cutout_type=0):
+    if cutout_type in (1, 8):
+        return image
+
+    copyright1, copyright2 = get_map_copyright_texts(map_type)
+    copyright_parts = [text.strip() for text in (copyright1, copyright2) if text and text.strip()]
+    if not copyright_parts:
+        return image
+
+    text = " | ".join(copyright_parts)
+    working_image = image.copy()
+
+    if working_image.mode not in ("RGB", "RGBA"):
+        working_image = working_image.convert("RGBA")
+
+    draw = ImageDraw.Draw(working_image)
+    selected_font = None
+    selected_bbox = None
+
+    for font_size in (10, 9, 8):
+        font = load_copyright_font(font_size)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+        box_width = text_width + 6
+        box_height = text_height + 4
+
+        if box_width + 4 <= working_image.width and box_height + 4 <= working_image.height:
+            selected_font = font
+            selected_bbox = bbox
+            break
+
+    if selected_font is None or selected_bbox is None:
+        return image
+
+    text_width = selected_bbox[2] - selected_bbox[0]
+    text_height = selected_bbox[3] - selected_bbox[1]
+    box_width = text_width + 6
+    box_height = text_height + 4
+    box_x0 = working_image.width - box_width - 4
+    box_y0 = working_image.height - box_height - 4
+    text_x = box_x0 + 3 - selected_bbox[0]
+    text_y = box_y0 + 2 - selected_bbox[1]
+
+    if working_image.mode == "RGBA":
+        background_fill = (255, 255, 255, 255)
+        # background_fill = (255, 255, 255, 0)
+        text_fill = (0, 0, 0, 255)
+    else:
+        background_fill = (255, 255, 255)
+        text_fill = (0, 0, 0)
+
+    draw.rectangle([box_x0, box_y0, box_x0 + box_width, box_y0 + box_height], fill=background_fill)
+    draw.text((text_x, text_y), text, font=selected_font, fill=text_fill)
+
+    return working_image
 
 # Function to rotate an image
 def rotate_image(image, angle, center_x, center_y):
@@ -1010,6 +1091,7 @@ def get_image_pbm():
 
         # Cutout and borders
         temp_image = cutout_image_bw(temp_image, cutout, tab, border)
+        temp_image = add_copyright_to_image(temp_image, map_type, cutout)
 
         # Dithering
         if dither_type == 1:
@@ -1097,6 +1179,7 @@ def get_image_json():
 
         # Post processing: converts image into a round/oval or square image
         temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
+        temp_image = add_copyright_to_image(temp_image, map_type, cutout)
         
         # Select the image output type based on the 'type' parameter
         if image_type == 1:
@@ -1244,6 +1327,7 @@ def get_image():
             
         # Post processing: converts image into a round/oval or square image
         final_image = cutout_image(final_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
+        final_image = add_copyright_to_image(final_image, map_type, cutout)
         
         # Convert the image to a byte stream
         img_io = io.BytesIO()
