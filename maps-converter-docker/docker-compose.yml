@@ -1,7 +1,7 @@
 ####################################################################
 # OBP Maps Converter
 #
-# Open Boat Projects, Norbert Walter (C) 2025
+# Open Boat Projects, Norbert Walter (C) 2026
 #
 # Usage in bash:
 #
@@ -57,11 +57,11 @@ services:
     volumes:
       - ${TILE_CACHE_DIR}:/app/tile_cache
       - ${LOG_DIR}:/app/logs
-      - ./Maps_Converter_V1_20.py:/app/Maps_Converter_V1_20.py:rw
+      - ./Maps_Converter_V1_21.py:/app/Maps_Converter_V1_21.py:rw
       - ./static:/app/static:rw
     restart: unless-stopped
     # Overrides the CMD from the Dockerfile for the local dev server
-    command: ["python", "Maps_Converter_V1_20.py"]
+    command: ["python", "Maps_Converter_V1_21.py"]
     profiles: ["dev"]
     logging:
       driver: "json-file"

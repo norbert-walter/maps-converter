@@ -2,7 +2,7 @@
 #
 # Maps-Converter
 #
-# Open Boat Projects, Norbert Walter (C) 2025
+# Open Boat Projects, Norbert Walter (C) 2025-2026
 #
 # The web server waits for a GET request. Depending on the request type, it returns a JSON string or an image.
 #
@@ -22,11 +22,14 @@
 # Landing page with version info
 # http://localhost:8080         
 #
+# PBM output for ESP32-S3 black and white image, 1bit color depth
+# http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2
+#
 # JSON output for ESP32-S3 OBP60, SW binary image as Base64 data (Byte stream)
-# http://localhost:8080/get_image_json?zoom=14&lat=54.5649&lon=13.1434&mtype=9&mrot=10&dtype=1&width=800&height=600&cutout=1&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
+# http://ip-address:8080/get_image_json?oformat=3&zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
 #
 # PNG image output for website 
-# http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=103486987&mrot=20&itype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
+# http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=2&mrot=20&itype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
 #
 # Output of the website metrics (last 100 readings)
 # http://localhost:8080/metrics
@@ -353,15 +356,35 @@ def draw_symbol_in_circle(
         draw.line([q1, q2], fill=red, width=cross_line_width)
 
     elif shape.lower() == "triangle":
-        # Ensure 0° = triangle tip up
         base_angle = angle_deg - 90.0
 
+        # The 3 corner points of the equilateral triangle
         pts = []
         for a in (base_angle, base_angle + 120.0, base_angle + 240.0):
             ux, uy = uvec(a)
             pts.append((cx + r_eff * ux, cy + r_eff * uy))
 
-        draw.polygon(pts, fill=red, outline=None)
+        # pts[0] = tip
+        # pts[1] = right corner of the base
+        # pts[2] = left corner of the base
+
+        # Midpoint of the base line (between pts[1] and pts[2])
+        mid_base_x = (pts[1][0] + pts[2][0]) / 2
+        mid_base_y = (pts[1][1] + pts[2][1]) / 2
+
+        # Centroid of the triangle
+        centroid_x = (pts[0][0] + pts[1][0] + pts[2][0]) / 3
+        centroid_y = (pts[0][1] + pts[1][1] + pts[2][1]) / 3
+
+        # Indentation point: halfway between base midpoint and centroid
+        # t=0.0 → no indentation, t=1.0 → full centroid (maximum indentation)
+        t = 0.5
+        indent_x = mid_base_x + t * (centroid_x - mid_base_x)
+        indent_y = mid_base_y + t * (centroid_y - mid_base_y)
+
+        # Polygon: tip → right corner → indentation point → left corner
+        arrow_pts = [pts[0], pts[1], (indent_x, indent_y), pts[2]]
+        draw.polygon(arrow_pts, fill=red, outline=None)
 
     return image
 
@@ -602,6 +625,84 @@ def cutout_image(
 
     return out
 
+def cutout_image_bw(
+    img: Image.Image,           # Has to be in RGB format
+    cutout_type: int = 1,       # 0=Original, 1=Round/Oval, 2=Square L, 3=Square R, 4=Square T, 5=Square B, 6=Square L+R, 7=Square T+B
+    tab_width: int = 0,         # Tab width in pixels (how far the tab intrudes)
+    border: int = 0,            # Line width between cutout and image
+) -> Image.Image:
+
+    if cutout_type == 0:
+        return img
+
+    w, h = img.size
+
+    bg_image = Image.new("RGB", (w, h), "white")
+    mask = Image.new("L", (w, h), 0)
+    draw = ImageDraw.Draw(mask)
+
+    # Masking
+    if cutout_type == 1:
+        # Ellipse
+        draw.ellipse((border, border, w-border, h-border), fill=255)
+    elif cutout_type == 8:
+        # Circle
+        diameter = min(w, h) - 2 * border
+        left = (w - diameter) // 2
+        top = (h - diameter) // 2
+        right = left + diameter
+        bottom = top + diameter
+        draw.ellipse((left, top, right, bottom), fill=255)
+    elif cutout_type == 2:
+        # Left box
+        draw.rectangle((tab_width, 0, w, h), fill=255)
+    elif cutout_type == 3:
+        # Right box
+        draw.rectangle((0, 0, w - tab_width, h), fill=255)
+    elif cutout_type == 4:
+        # Top box
+        draw.rectangle((0, tab_width, w, h), fill=255)
+    elif cutout_type == 5:
+        # Bottom box
+        draw.rectangle((0, 0, w, h - tab_width), fill=255)
+    elif cutout_type == 6:
+        # Left and right box
+        draw.rectangle((tab_width, 0, w - tab_width, h), fill=255)
+    elif cutout_type == 7:
+        # Top and bottom box
+        draw.rectangle((0, tab_width, w, h - tab_width), fill=255)
+
+    bg_image.paste(img, (0, 0), mask)
+
+    # Border
+    if border > 0:
+        draw = ImageDraw.Draw(bg_image)
+        if cutout_type == 1:
+            draw.ellipse((0, 0, w, h), outline=0, width=border)
+        elif cutout_type == 8:
+            diameter = min(w, h)
+            left = (w - diameter) // 2
+            top = (h - diameter) // 2
+            right = left + diameter
+            bottom = top + diameter
+            draw.ellipse((left, top, right, bottom), outline=0, width=border)
+        elif cutout_type == 2:
+            draw.line(((tab_width, 0), (tab_width, h)), fill=255, width=border)
+        elif cutout_type == 3:
+            draw.line(((w - tab_width, 0), (w - tab_width, h)), fill=255, width=border)
+        elif cutout_type == 4:
+            draw.line(((0, tab_width), (w, tab_width)), fill=255, width=border)
+        elif cutout_type == 5:
+            draw.line(((0, h - tab_width), (w, h - tab_width)), fill=255, width=border)
+        elif cutout_type == 6:
+            draw.line(((tab_width, 0), (tab_width, h)), fill=255, width=border)
+            draw.line(((w - tab_width, 0), (w- tab_width, h)), fill=255, width=border)
+        elif cutout_type == 7:
+            draw.line(((0, tab_width), (w, tab_width)), fill=255, width=border)
+            draw.line(((0, h - tab_width), (w, h - tab_width)), fill=255, width=border)
+
+    return bg_image
+
 ###################################################################################
 # Image conversion to different formats                                           #
 ################################################################################### 
@@ -738,8 +839,18 @@ def limit_check(min, max, input, typ=int):
     except ValueError:
         # Error message for invalid inputs
         raise ValueError(f"Invalid input: '{input}' cannot be converted to {typ.__name__}.")
-        
-        
+
+def limit_tab(tab, cutout, width, height):
+    if cutout in (2, 3):
+        tab = limit_check(0, width, tab, int)
+    elif cutout in (4, 5):
+        tab = limit_check(0, height, tab, int)
+    elif cutout == 6:
+        tab = limit_check(0, (width/2), tab, int)
+    elif cutout == 7:
+        tab = limit_check(0, (height/2), tab, int)
+    return tab
+
 # Request timestamps for calculating requests per second
 request_timestamps = deque(maxlen=1000)  # limited to save memory
 
@@ -799,16 +910,16 @@ def start():
 </head>
 <body>
     <h1>OBP Maps Converter</h1>
-    <p>(C) Norbert Walter 2025, Open Boat Projects</p>
+    <p>(C) Norbert Walter 2025-2026, Open Boat Projects</p>
     <p>{filename}</p>
 </body>
 </html>
     '''
 
-# Respond to HTTP request for JSON response
-###########################################
-@app.route('/get_image_json', methods=['GET'])
-def get_image_json():
+# Respond to HTTP request for PBM image
+#######################################
+@app.route('/get_image_pbm', methods=['GET'])
+def get_image_pbm():
     try:
         # Extract parameters from the request
         lat = float(request.args.get('lat'))
@@ -826,7 +937,7 @@ def get_image_json():
         sym_rotation = float(request.args.get('srot', 0))   # Symbol rotation 0...360 deg
         sym_size = int(request.args.get('ssize', 15))       # Symbol size 10...100
         show_grid = int(request.args.get('grid', 0))
-        
+
         # Validate input values
         lat = limit_check(-90.0, 90.0, lat, float)
         lon = limit_check(-180.0, 180.0, lon, float)
@@ -836,24 +947,95 @@ def get_image_json():
         width = limit_check(50, 800, width, int)
         height = limit_check(50, 600, height, int)
         zoom_level = limit_check(0, 18, zoom_level, int)
+        cutout = limit_check(0, 8, cutout, int)
+        tab = limit_tab(tab, cutout, width, height)
+        border = limit_check(0, 6, border, int)
+        symbol = limit_check(0, 2, symbol, int)
+        sym_rotation = limit_check(-360.0, 360.0, sym_rotation, float)
+        sym_size = limit_check(0, 100, sym_size, int)
+        show_grid = limit_check(0, 1, show_grid, int)
+
+        # Load tiles, stitch them together, rotate, and crop
+        temp_image = stitch_and_rotate_tiles(lat, lon, zoom_level, (width, height), map_rotation, map_type, symbol, sym_size, sym_rotation, show_grid)
+
+        # Cutout and borders
+        temp_image = cutout_image_bw(temp_image, cutout, tab, border)
+
+        # Dithering
+        if dither_type == 1:
+            bw_image = threshold_dither(temp_image)
+        elif dither_type == 3:
+            bw_image = ordered_dither(temp_image)
+        elif dither_type == 4:
+            bw_image = atkinson_dither(temp_image)
+        else:
+            bw_image = floyd_steinberg_dither(temp_image)
+
+        img_io = io.BytesIO()
+        bw_image.save(img_io, format="PPM")
+        img_io.seek(0)
+
+        # Return the image as a response
+        return send_file(img_io, mimetype='image/x-portable-bitmap', download_name="obpmap.pbm")
+
+    except Exception as e:
+        return str(e), 500
+
+# Respond to HTTP request for JSON response
+###########################################
+@app.route('/get_image_json', methods=['GET'])
+def get_image_json():
+    try:
+        # Extract parameters from the request
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+        map_rotation = float(request.args.get('mrot', 0))   # Map rotation 0...360 deg
+        map_type = int(request.args.get('mtype', 1))
+        image_type = int(request.args.get('itype', 4))      # 1: Color, 2: Grayscale, 3: 4-Level Grayscale, 4: BW with Dithering
+        output_format = int(request.args.get('oformat', 4)) # 1: RGB888, 2: RGB666, 3: RGB565, 4: BW 1-Bit
+        dither_type = int(request.args.get('dtype', 2))     # 1: Threshold 2: Floyd Steinberg 3: Ordered 4: Atkinson (slow)
+        width = int(request.args.get('width', 400))
+        height = int(request.args.get('height', 300))
+        zoom_level = int(request.args.get('zoom', 15))      # Standard zoom level 15
+        cutout = int(request.args.get('cutout', 0))         # 0=Original, 1=Round/Oval, 2=Square L, 3=Square R, 4=Square T, 5=Square B, 6=Square L+R, 7=Square T+B
+        tab = int(request.args.get('tab', 0))               # Tab with in pixel depends on picture size
+        border = int(request.args.get('border', 0))         # 0: Without border 1...6: Border width in Pixel
+        alpha = int(request.args.get('alpha', 0))           # 0...100%, 0: Complete cutout 100: Original image
+        symbol = int(request.args.get('symbol', 0))         # Center symbol 0: no symbol 1: Cross 2: Triangle
+        sym_rotation = float(request.args.get('srot', 0))   # Symbol rotation 0...360 deg
+        sym_size = int(request.args.get('ssize', 15))       # Symbol size 10...100
+        show_grid = int(request.args.get('grid', 0))
+        
+        # Validate input values
+        lat = limit_check(-90.0, 90.0, lat, float)
+        lon = limit_check(-180.0, 180.0, lon, float)
+        map_rotation = limit_check(-360.0, 360.0, map_rotation, float)
+        map_type = limit_check(1, 200000000, map_type, int)
+        image_type = limit_check(1, 4, image_type, int)
+        output_format = limit_check(1, 4, output_format, int)
+        dither_type = limit_check(1, 4, dither_type, int)
+        width = limit_check(50, 800, width, int)
+        height = limit_check(50, 600, height, int)
+        zoom_level = limit_check(0, 18, zoom_level, int)
         cutout = limit_check(0, 7, cutout, int)
         if cutout == 0:
             tab = limit_check(0, 0, tab, int)
-        if cutout == 1:
+        elif cutout == 1:
             tab = limit_check(0, 0, tab, int)
-        if cutout == 2:
+        elif cutout == 2:
             tab = limit_check(0, width, tab, int)
-        if cutout == 3:
+        elif cutout == 3:
             tab = limit_check(0, width, tab, int)
-        if cutout == 4:
+        elif cutout == 4:
             tab = limit_check(0, height, tab, int)
-        if cutout == 5:
+        elif cutout == 5:
             tab = limit_check(0, height, tab, int)
-        if cutout == 6:
+        elif cutout == 6:
             tab = limit_check(0, (width/2), tab, int)    
-        if cutout == 7:
+        elif cutout == 7:
             tab = limit_check(0, (height/2), tab, int)      
         border = limit_check(0, 6, border, int)
+        alpha = limit_check(0, 100, alpha, int)
         symbol = limit_check(0, 2, symbol, int)
         sym_rotation = limit_check(-360.0, 360.0, sym_rotation, float)
         sym_size = limit_check(0, 100, sym_size, int)
@@ -864,13 +1046,49 @@ def get_image_json():
         temp_image = stitch_and_rotate_tiles(lat, lon, zoom_level, output_size_pixels, map_rotation, map_type, symbol, sym_size, sym_rotation, show_grid)
 
         # Post processing: converts image into a round/oval or square image
-        temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=0)
+        temp_image = cutout_image(temp_image, cutout, tab, border_color=(0, 0, 0),  border_width=border, outside_alpha=alpha)
+        
+        # Select the image output type based on the 'type' parameter
+        if image_type == 1:
+            final_image = temp_image  # Color image
+        elif image_type == 2:
+            final_image = convert_to_grayscale(temp_image)  # Grayscale
+        elif image_type == 3:
+            final_image = convert_to_4_grayscale(temp_image)  # 4-level grayscale
+        elif image_type == 4:
+            final_image = convert_to_black_and_white(temp_image, dither_type)  # Black and white with dithering
+        else:
+            return "Invalid image type!", 400
+            
+        # Select the image output format
+        if output_format == 1:      # RGB888
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8)
+            byte_array = rgb_array.reshape(-1, 3).flatten().tolist()
 
-        # Create black and white image with dithering
-        bw_image = convert_to_black_and_white(temp_image, dither_type)
+        elif output_format == 2:    # RGB666
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8)
+            rgb666_array = rgb_array & 0xFC
+            byte_array = rgb666_array.reshape(-1, 3).flatten().tolist()
 
-        # Convert the image to a byte array (1 for black, 0 for white)
-        byte_array = image_to_bytearray(bw_image)
+        elif output_format == 3:    # RGB565 (very popular)
+            rgb_array = np.array(final_image.convert('RGB'), dtype=np.uint8).reshape(-1, 3)
+            r = rgb_array[:, 0].astype(np.uint16)
+            g = rgb_array[:, 1].astype(np.uint16)
+            b = rgb_array[:, 2].astype(np.uint16)
+            rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+            byte_array = np.empty(rgb565.size * 2, dtype=np.uint8)
+            byte_array[0::2] = (rgb565 & 0xFF).astype(np.uint8)         # low byte first
+            byte_array[1::2] = ((rgb565 >> 8) & 0xFF).astype(np.uint8)  # high byte second
+            byte_array = byte_array.tolist()
+
+        elif output_format == 4:    # Convert the image to a byte array (1Bit, 1 = black, 0 = white)
+            if image_type == 4:
+                bw_for_bytes = final_image
+            else:
+                bw_for_bytes = convert_to_black_and_white(final_image, dither_type)
+            byte_array = image_to_bytearray(bw_for_bytes)
+        else:
+            return "Invalid image output format!", 400      
         
         # Encode to Base64
         base64_bytes = base64.b64encode(bytearray(byte_array))
@@ -890,6 +1108,7 @@ def get_image_json():
             'width': width,
             'height': height,
             'number_pixels': number_pixels,
+            'output_format': output_format,
             'picture_base64': base64_string  # Return image as Base64 data
         }
 
@@ -913,7 +1132,7 @@ def get_image():
         image_type = int(request.args.get('itype', 1))      # 1: Color, 2: Grayscale, 3: 4-Level Grayscale, 4: BW with Dithering
         width = int(request.args.get('width', 400))
         height = int(request.args.get('height', 300))
-        zoom_level = int(request.args.get('zoom', 15))      # Standaimport time
+        zoom_level = int(request.args.get('zoom', 15))      # Standard zoom level
         cutout = int(request.args.get('cutout', 0))         # 0=Original, 1=Round/Oval, 2=Square L, 3=Square R, 4=Square T, 5=Square B, 6=Square L+R, 7=Square T+B
         tab = int(request.args.get('tab', 0))               # Tab with in pixel depends on picture size
         border = int(request.args.get('border', 0))         # 0: Without border 1...6: Border width in Pixel
@@ -928,27 +1147,27 @@ def get_image():
         lon = limit_check(-180.0, 180.0, lon, float)
         map_rotation = limit_check(-360.0, 360.0, map_rotation, float)
         map_type = limit_check(1, 200000000, map_type, int)
-        dither_type = limit_check(1, 4, dither_type, int)
         image_type = limit_check(1, 4, image_type, int)
+        dither_type = limit_check(1, 4, dither_type, int)
         width = limit_check(50, 1920, width, int)
         height = limit_check(50, 1920, height, int)
         zoom_level = limit_check(0, 18, zoom_level, int)     
         cutout = limit_check(0, 7, cutout, int)
         if cutout == 0:
             tab = limit_check(0, 0, tab, int)
-        if cutout == 1:
+        elif cutout == 1:
             tab = limit_check(0, 0, tab, int)
-        if cutout == 2:
+        elif cutout == 2:
             tab = limit_check(0, width, tab, int)
-        if cutout == 3:
+        elif cutout == 3:
             tab = limit_check(0, width, tab, int)
-        if cutout == 4:
+        elif cutout == 4:
             tab = limit_check(0, height, tab, int)
-        if cutout == 5:
+        elif cutout == 5:
             tab = limit_check(0, height, tab, int)
-        if cutout == 6:
+        elif cutout == 6:
             tab = limit_check(0, (width/2), tab, int)    
-        if cutout == 7:
+        elif cutout == 7:
             tab = limit_check(0, (height/2), tab, int)      
         border = limit_check(0, 6, border, int)
         alpha = limit_check(0, 100, alpha, int)
@@ -1170,7 +1389,7 @@ def help():
 </head>
 <body>
     <h1>Map Converter</h1>
-    <p>Open Boat Projects (C) 2025 Norbert Walter, MIT</p>
+    <p>Open Boat Projects (C) 2025-2026 Norbert Walter, MIT</p>
     <p>The <strong>Map Converter</strong> is a server service for converting nautical charts into various resolutions and image formats. This allows for the creation of relatively simple navigation devices based on a microcontroller with various display types. Both color and black-and-white displays are supported.</p>
     <p>The microcontroller sends an HTTP GET request to the server, specifying the geocoordinates, direction of travel, image size, and image type. The server then transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.</p>
     <h2>Using the map server</h2>
@@ -1202,7 +1421,7 @@ def help():
     <p><a href="http://ip-address:8080/map_help">http://ip-address:8080/map_help</a></p>
     <p>This page is a online help for the Map Service.</p>
     
-    <h2>Docker Konfiguration</h2>
+    <h2>Docker Configuration</h2>
     <p>The Docker container is listed in the public repository on Docker Hub. It can be found at:</p>
     <p><a href="https://hub.docker.com/r/openboatprojects/maps_converter">openboatprojects/maps_converter</a></p>
     
@@ -1213,7 +1432,7 @@ def help():
     <p>Currently accessed map areas are stored in a RAM cache for subsequent access. The RAM cache size is 512 MB. This allows approximately 10,000 tiles to be stored in the RAM cache and allows approximately 50 devices to be served simultaneously. Older saved map areas are automatically deleted when the cache is full.</p>
             
     <h3>Dockerfile</h3>
-    <p><code># Basis-Image with Python</code><br><code>FROM python:3.11-slim</code></p>
+    <p><code># Base-Image with Python</code><br><code>FROM python:3.11-slim</code></p>
     <p><code># Create folder</code><br><code>WORKDIR /app</code></p>
     <p><code># Install sytem requirements (for Pillow and other)</code><br><code>RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \</code><br><code>build-essential \</code><br><code>libjpeg-dev \</code><br><code>zlib1g-dev \</code><br><code>libfreetype6-dev \</code><br><code>liblcms2-dev \</code><br><code>libwebp-dev \</code><br><code>libopenjp2-7 \</code><br><code>libtiff-dev \</code><br><code>libxml2-dev \</code><br><code>libxslt1-dev \</code><br><code>libharfbuzz-dev \</code><br><code>libfribidi-dev \</code><br><code>libxcb1 \</code><br><code>&amp;&amp; rm -rf /var/lib/apt/lists/*</code></p>
     <p><code># Copy and install requirements.txt</code><br><code>COPY requirements.txt .</code><br><code>RUN pip install --no-cache-dir -r requirements.txt</code></p>
@@ -1277,7 +1496,7 @@ def map_demo():
   <h1>OBP Map Service</h1>
 
   <h2>NMEA0183 Websocket</h2>
-  <label>WebSocket IP-Adresse: <input type="text" id="ip"></label><br>
+  <label>WebSocket IP-Adress: <input type="text" id="ip"></label><br>
   <label>WebSocket Port: <input type="number" id="port"></label><br>
    <label>
       Auto Start:
@@ -1377,7 +1596,7 @@ def demo():
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Swipe Navigation Beispiel</title>
+  <title>Swipe Navigation Example</title>
   <style>
     html, body {
       margin: 0;
@@ -1425,12 +1644,12 @@ def demo():
       <button id="fullscreen-btn">Vollbild aktivieren</button>
     </section>
     <section class="page" id="page2">
-      <h1>Informationen</h1>
-      <p>Hier kannst du weitere Inhalte anzeigen, z. B. Informationen, Medien oder Formulare.</p>
+      <h1>Information</h1>
+      <p>Here you can view additional content, such as information, media, or forms.</p>
     </section>
     <section class="page" id="page3">
-      <h1>Kontakt</h1>
-      <p>Dies ist die letzte Seite. Du kannst nun wieder nach rechts wischen, um zurückzugehen.</p>
+      <h1>Contact</h1>
+      <p>This is the last page. You can now swipe right to go back.</p>
     </section>
   </div>
 
@@ -1451,7 +1670,7 @@ def demo():
       handleSwipe(endX - startX);
     });
 
-    // Maus Events (für Desktop)
+    // Mouse events (for Desktop)
     container.addEventListener('mousedown', (e) => {
       startX = e.clientX;
     });
@@ -1461,7 +1680,7 @@ def demo():
       handleSwipe(endX - startX);
     });
 
-    // Gemeinsame Logik für Touch und Maus
+    // common logic for touch and mouse
     function handleSwipe(deltaX) {
       if (deltaX < -50 && currentPage < totalPages - 1) {
         currentPage++;
@@ -1472,9 +1691,9 @@ def demo():
       container.style.transform = `translateX(-${currentPage * 100}vw)`;
     }
     
-    // Vollbildmodus aktivieren
+    // enable fullscreen mode
     document.getElementById("fullscreen-btn").addEventListener("click", () => {
-      const el = document.documentElement; // oder ein bestimmtes <div>
+      const el = document.documentElement; // or distinct <div>
 
       if (el.requestFullscreen) {
         el.requestFullscreen();
@@ -1503,5 +1722,5 @@ if __name__ == '__main__':
     # Start the JSON server in a separate thread
     Thread(target=run_json_server).start()
 
-    print("Server running on port ", serverport, " for JSON responses.")
+    print(f"Server running on port {serverport} for JSON responses.")
 

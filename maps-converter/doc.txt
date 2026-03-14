@@ -2,71 +2,133 @@ The map_converter is a server service for converting nautical charts into variou
 
 The microcontroller sends a HTTP GET request to the server specifying the geocoordinates, direction of travel, image size, and image type, and the server transmits the finished rendered image to the microcontroller. The server queries various map services and combines the individual tiles and navigation mark layers into an image, rotates the image in the desired direction, and outputs it in the desired size and color. The image is output as a PNG image or as a black-and-white binary image in JSON. The microcontroller then only needs to display the received image on the display and is freed from all image processing functions.
 
+Nautical chart as picture
+#########################
+
 The server acts as a map proxy with file and RAM cache to improve performance and can be accessed via various URLs:
 
-http://localhost:8080/get_image?zoom=14&lat=54.5649&lon=13.1434&mtype=103486987&mrot=20&itype=1&dtype=2&width=800&height=480&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
+http://ip-address:8080/get_image?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
 
 zoom: Zoom level 1...17
+
 lat: Latitude
-lon: Latitude
+
+lon: Longitude
+
 mtype: Map type 1...9
-1 Open Street Map
-2 Google Hybrid
-3 Google Street
-4 Google Terrain Street Hybrid
-5 Open Topo Map
-6 Esri Base Map
-7 Stadimaps Toner SW
-8 Stadimaps Terrain
-9 Free Nautical Charts (limited to German coastal waters)
+
+    1 Open Street Map
+    2 Google Hybrid
+    3 Google Street
+    4 Google Terrain Street Hybrid
+    5 Open Topo Map
+    6 Esri Base Map
+    7 Stadimaps Toner SW
+    8 Stadimaps Terrain
+    9 Free Nautical Charts (limited to German coastal waters)
+
 mrot: Map rotation in degrees 0...360°, +/- 360°
+
 itype: Image types 1...4
-1 Color
-2 Grayscale 256-bit
-3 Grayscale 4-bit
-4 Black and white image 1-bit, dithered
+
+    1 Color
+    2 Grayscale 256-bit
+    3 Grayscale 4-bit
+    4 Black and white image 1-bit, dithered
+
 dtype: Dithering types 1...4 for black and white images
-1 Threshold dithering
-2 Flow Steinberg dithering
-3 Ordered dithering
-4 Atkinson dithering
+
+    1 Threshold dithering
+    2 Floyd-Steinberg dithering
+    3 Ordered dithering
+    4 Atkinson dithering
+
 width: Image width in pixels
+
 height: Image height in pixels
+
 cutout: Image cutouts
-0 No cutout
-1 Round cutout
-2 Square cutout left
-3 Square cutout right
-4 Square cutout top
-5 Square cutout bottom
-6 Square cutout left + right
-7 Square cutout top + bottom
-tab: Tabs width in pixel only for square cutouts
+
+    0 No cutout
+    1 Elliptical cutout
+    2 Square cutout left
+    3 Square cutout right
+    4 Square cutout top
+    5 Square cutout bottom
+    6 Square cutout left + right
+    7 Square cutout top + bottom
+    8 Circle cutout (only for 1bit pbm format)
+
+tab: Tab width in pixels (only for square cutouts)
+
 border: Border width in pixel 0...6
-alpha: Transparent value für cutouts 0...100%
+
+alpha: Transparency value for cutouts 0...100%
+
 symbol: Symbol for center marking
-0 No symbol
-1 Cross
-2 Triangle
+
+    0 No symbol
+    1 Cross
+    2 Triangle
+
 srot: Symbol rotation 0...360°
-ssize: Symbol size in pixel 0...100
-grid: Geo grid for show tile size
-0 off
-1 on
 
+ssize: Symbol size in pixels 0...100
 
-http://localhost:8080/get_image_json?zoom=14&lat=54.5649&lon=13.1434&mtype=9&mrot=10&dtype=1&width=800&height=600&cutout=1&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
+grid: Show tile grid overlay
 
-The parameters are identical to the previous descriptions wothout itype and alpha. The image is output as JSON in black and white and is Base64 encoded. The image data is binary. The pixels are encoded as bits in the bytes (MSB first). The image information is output line by line from left to right and top to bottom. The zero coordinate is located in the upper left corner of the image.
+    0 off
+    1 on
+
+Nautical chart as JSON
+######################
+
+http://ip-address:8080/get_image_json?oformat=3&zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&itype=4&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&alpha=40&symbol=2&srot=20&ssize=15&grid=1
+
+All parameters are identical to the previous section, plus the new parameter oformat.
+
+oformat: Output format 1...4
+
+    1 RGB888 (3 bytes per pixel: R, G, B)
+    2 RGB666 (3 bytes per pixel, 6-bit precision per channel, stored in 8-bit bytes)
+    3 RGB565 (2 bytes per pixel, high byte first, then low byte)
+    4 Black-and-white 1-bit packed format (MSB first, white = 0, black = 1)
+
+The image data is returned in Base64 as a binary byte stream. Pixel data is serialized row by row from left to right and top to bottom, with the origin at the upper-left corner.
+
+The nautical chart can be decorated as an image and copied into the display framebuffer. The output is compatible with common microcontroller display pipelines (including ESP32-S3 use cases) and with the Adafruit GFX library. Sample code for OBP60 and OBP40 can be found here: https://github.com/norbert-walter/obp60-navigation-map
+
+Nautical chart as pbm picture
+#############################
+
+http://ip-address:8080/get_image_pbm?zoom=15&lat=51.3343488&lon=7.0025216&mtype=8&mrot=10&dtype=3&width=400&height=300&cutout=6&tab=100&border=2&symbol=2&srot=20&ssize=15&grid=1
+
+For the smallest data footprint, 1-bit black-and-white PBM format is available.
+
+The alpha and itype parameters are not required for this format.
+
+Server Dashboard
+################
 
 http://ip-address:8080/dashboard
 
 Displays a dashboard with information about server utilization:
-* Response time
-* CPU utilization
-* RAM cache utilization
-* Number of users
+
+    Response time
+    CPU utilization
+    RAM cache utilization
+    Number of users
+
+Map Service
+###########
 
 http://ip-address:8080/map_service
 
 The map service displays a web page that allows for simple navigation. The map center is your current location. Various NMEA 0183 sources can be transmitted and displayed to transmit geocoordinates and some boat information. On mobile phones and laptops with a built-in GPS receiver, this can be used for navigation. The device's own GPS receiver takes priority.
+
+Help
+####
+
+http://ip-address:8080/help
+
+This page is an online help page for the Map Service.

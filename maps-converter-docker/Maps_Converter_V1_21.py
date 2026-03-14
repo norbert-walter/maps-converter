@@ -356,15 +356,35 @@ def draw_symbol_in_circle(
         draw.line([q1, q2], fill=red, width=cross_line_width)
 
     elif shape.lower() == "triangle":
-        # Ensure 0° = triangle tip up
         base_angle = angle_deg - 90.0
 
+        # The 3 corner points of the equilateral triangle
         pts = []
         for a in (base_angle, base_angle + 120.0, base_angle + 240.0):
             ux, uy = uvec(a)
             pts.append((cx + r_eff * ux, cy + r_eff * uy))
 
-        draw.polygon(pts, fill=red, outline=None)
+        # pts[0] = tip
+        # pts[1] = right corner of the base
+        # pts[2] = left corner of the base
+
+        # Midpoint of the base line (between pts[1] and pts[2])
+        mid_base_x = (pts[1][0] + pts[2][0]) / 2
+        mid_base_y = (pts[1][1] + pts[2][1]) / 2
+
+        # Centroid of the triangle
+        centroid_x = (pts[0][0] + pts[1][0] + pts[2][0]) / 3
+        centroid_y = (pts[0][1] + pts[1][1] + pts[2][1]) / 3
+
+        # Indentation point: halfway between base midpoint and centroid
+        # t=0.0 → no indentation, t=1.0 → full centroid (maximum indentation)
+        t = 0.5
+        indent_x = mid_base_x + t * (centroid_x - mid_base_x)
+        indent_y = mid_base_y + t * (centroid_y - mid_base_y)
+
+        # Polygon: tip → right corner → indentation point → left corner
+        arrow_pts = [pts[0], pts[1], (indent_x, indent_y), pts[2]]
+        draw.polygon(arrow_pts, fill=red, outline=None)
 
     return image
 
@@ -1057,8 +1077,8 @@ def get_image_json():
             b = rgb_array[:, 2].astype(np.uint16)
             rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
             byte_array = np.empty(rgb565.size * 2, dtype=np.uint8)
-            byte_array[0::2] = ((rgb565 >> 8) & 0xFF).astype(np.uint8)
-            byte_array[1::2] = (rgb565 & 0xFF).astype(np.uint8)
+            byte_array[0::2] = (rgb565 & 0xFF).astype(np.uint8)         # low byte first
+            byte_array[1::2] = ((rgb565 >> 8) & 0xFF).astype(np.uint8)  # high byte second
             byte_array = byte_array.tolist()
 
         elif output_format == 4:    # Convert the image to a byte array (1Bit, 1 = black, 0 = white)

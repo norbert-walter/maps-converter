@@ -3,14 +3,14 @@ FROM python:3.11-slim
 
 # OCI Labels
 LABEL org.opencontainers.image.authors="Norbert Walter"
-LABEL org.opencontainers.image.title="Map Converter"
-LABEL org.opencontainers.image.description="Map server with image converter"
-LABEL org.opencontainers.image.version="1.20.0"
+LABEL org.opencontainers.image.title="Maps Converter"
+LABEL org.opencontainers.image.description="Maps server with image converter"
+LABEL org.opencontainers.image.version="1.21.0"
 LABEL org.opencontainers.image.revision="1234567890abcdef" 
-LABEL org.opencontainers.image.created="2025-08-07T08:30:00Z"
+LABEL org.opencontainers.image.created="2026-03-12T15:32:00Z"
 LABEL org.opencontainers.image.url="https://open-boat-projects.org"
-LABEL org.opencontainers.image.source="https://github.com/norbert-walter/map_converter"
-LABEL org.opencontainers.image.documentation="https://github.com/norbert-walter/map_converter"
+LABEL org.opencontainers.image.source="https://github.com/norbert-walter/maps-converter"
+LABEL org.opencontainers.image.documentation="https://github.com/norbert-walter/maps-converter"
 LABEL org.opencontainers.image.vendor="Open Boat Projects"
 LABEL org.opencontainers.image.licenses="MIT"
 
@@ -44,7 +44,7 @@ RUN mkdir /app/static
 RUN mkdir /app/tile_cache
 
 # Copy project data
-COPY Maps_Converter_V1_20.py .
+COPY Maps_Converter_V1_21.py .
 COPY monitor.py .
 COPY map_logic_7.js . /app/static
 
@@ -56,13 +56,13 @@ EXPOSE 8080
 # -b: Bind address
 # --threads: Simple parallelism alongside worker processes
 # --timeout. Automatic restart of hanging requests
-# Note: The Flask app is called "app" in Maps_Converter_V1_20.py
-# CMD ["gunicorn", "-w", "4", "--threads", "4", "--timeout", "60", "-b", "0.0.0.0:8080", "Maps_Converter_V1_20:app"]
-CMD ["sh", "-c", "gunicorn -w ${WORKERS:-4} --threads ${THREADS:-4} --timeout ${TIMEOUT:-60} -b 0.0.0.0:8080 Maps_Converter_V1_20:app"]
+# Note: The Flask app is called "app" in Maps_Converter_V1_21.py
+# CMD ["gunicorn", "-w", "4", "--threads", "4", "--timeout", "60", "-b", "0.0.0.0:8080", "Maps_Converter_V1_21:app"]
+CMD ["sh", "-c", "gunicorn -w ${WORKERS:-4} --threads ${THREADS:-4} --timeout ${TIMEOUT:-60} -b 0.0.0.0:8080 Maps_Converter_V1_21:app"]
 
 
 # Option B: Development mode (use instead)
-# CMD ["python", "Maps_Converter_V1_20.py"]
+# CMD ["python", "Maps_Converter_V1_21.py"]
 
 # Healthcheck checks if the Python script is still running otherwise restart
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
