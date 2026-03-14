@@ -135,13 +135,13 @@ def latlon_to_xyz(lat, lon, zoom):
 def get_user_agent():
     os_name = platform.system()
     if os_name == "Windows":
-        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:92.0) Gecko/20100101 Firefox/92.0"
+        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101"
     elif os_name == "Linux":
-        return "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:130.0) Gecko/20100101 Firefox/130.0"
+        return "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:148.0) Gecko/20100101 Firefox/148.0"
     elif os_name == "Darwin":  # MacOS
-        return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7; rv:92.0) Gecko/20100101 Firefox/92.0"
+        return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7; rv:148.0) Gecko/20100101"
     else:
-        return "Mozilla/5.0 (compatible; Unknown OS; rv:92.0) Gecko/20100101 Firefox/92.0"
+        return "Mozilla/5.0 (compatible; Unknown OS; rv:148.0) Gecko/20100101"
 
 # Function to fetch MB-Tiles tiles
 def fetch_osm_tile(x, y, zoom, map_type):
@@ -175,67 +175,137 @@ def fetch_osm_tile(x, y, zoom, map_type):
     if map_type == 1:
         url1 = f"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png"      # Open Street Map color
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': 'MyApplication/1.0 (http://myapplication.org; contact: info@myapplication.org',# Use the custom User-Agent function
+            'Referer': 'https://www.openstreetmap.de/'                   # Special Referer!
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "OpenStreetMap"
+        copyright2 = "OpenSeaMap"
     elif map_type == 2:
         url1 = f"https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={zoom}"  # Google Hybrid
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://mt1.google.com/'                         # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "GoogleMaps"
+        copyright2 = "OpenSeaMap"
     elif map_type == 3:
         url1 = f"https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={zoom}"  # Google Street
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://mt1.google.com/'                         # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "GoogleMaps"
+        copyright2 = "OpenSeaMap"
     elif map_type == 4:
         url1 = f"https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={zoom}"  # Google Terrain Street Hybrid
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://mt1.google.com/'                         # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "GoogleMaps"
+        copyright2 = "OpenSeaMap"
     elif map_type == 5:
         url1 = f"https://tile.opentopomap.org/{zoom}/{x}/{y}.png"        # Open Topo Map
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://tile.opentopomap.org/'                   # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "OpenTopoMap"
+        copyright2 = "OpenSeaMap"
     elif map_type == 6:
         url1 = f"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}"  # Esri Base Map
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://server.arcgisonline.com/'                # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "EsriBaseMap"
+        copyright2 = "OpenSeaMap"
     elif map_type == 7:
-        url1 = f"https://tiles.stadiamaps.com/tiles/stamen_toner/{zoom}/{x}/{y}.png?api_key=2ab75b65-06ac-4c54-b041-bf1a65d3a2ab" # Stadimaps toner sw
+        url1 = f"https://tiles.stadiamaps.com/tiles/stamen_toner/{zoom}/{x}/{y}.png?api_key=2ab75b65-06ac-4c54-b041-bf1a65d3a2ab" # Stadiamaps toner sw
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://tiles.stadiamaps.com/'                   # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "StadiaMaps"
+        copyright2 = "OpenSeaMap"
     elif map_type == 8:
-        url1 = f"https://tiles.stadiamaps.com/tiles/stamen_terrain/{zoom}/{x}/{y}.png?api_key=2ab75b65-06ac-4c54-b041-bf1a65d3a2ab" # Stadimaps terrain
+        url1 = f"https://tiles.stadiamaps.com/tiles/stamen_terrain/{zoom}/{x}/{y}.png?api_key=2ab75b65-06ac-4c54-b041-bf1a65d3a2ab" # Stadiamaps terrain
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"   # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://tiles.stadiamaps.com/'                   # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "StadiaMaps"
+        copyright2 = "OpenSeaMap"
     elif map_type == 9:
         url1 = f"https://freenauticalchart.net/qmap-de/{zoom}/{x}/{y}.png" # Free Nautical Chart (Quantenschaum)
         url2 = f""  # No overlay
-        headers = {
-            'User-Agent': get_user_agent()                               # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://freenauticalchart.net/'                  # Referer
         }
+        headers2 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "FreeNauticalChart"
+        copyright2 = ""
     else:
         url1 = f"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png"     # Open Street Map color#
         url2 = f"https://t1.openseamap.org/seamark/{zoom}/{x}/{y}.png"  # Overlay Open Sea Map Sea Marks (transparent overlay)
-        headers = {
-            'User-Agent': get_user_agent()                              # Use the custom User-Agent function
+        headers1 = {
+            'User-Agent': get_user_agent(),                              # Use the custom User-Agent function
+            'Referer': 'https://tile.openstreetmap.de/'                  # Special Referer!
         }
+        headers2 = {
+            'User-Agent': 'MyApplication/1.0 (http://myapplication.org; contact: info@myapplication.org',# Use the custom User-Agent function
+            'Referer': 'https://t1.openseamap.org/'                      # Referer
+        }
+        copyright1 = "OpenStreetMap"
+        copyright2 = "OpenSeaMap"
 
     # Load background image
-    response = requests.get(url1, headers=headers)
-    if response.status_code == 200 or response.status_code == 304:
+    response = requests.get(url1, headers1)
+    if response.status_code == 200:
         background = Image.open(BytesIO(response.content))
     else:
         print(f"Status Code {response.status_code}")
@@ -247,7 +317,7 @@ def fetch_osm_tile(x, y, zoom, map_type):
 
     # Load sea marks overlay
     if url2 != "":
-        response = requests.get(url2, headers=headers)
+        response = requests.get(url2, headers2)
         if response.status_code == 200:
             overlay = Image.open(BytesIO(response.content))
         else:
